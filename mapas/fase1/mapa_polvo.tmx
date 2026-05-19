@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="54" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="17">
+ <editorsettings>
+  <export target="mapa_polvo.lua" format="lua"/>
+ </editorsettings>
+ <imagelayer id="2" name="imagem_mapa">
+  <image source="mapa_polvo.png" width="1675" height="939"/>
+ </imagelayer>
+ <objectgroup id="3" name="colisoes">
+  <object id="1" x="54.7676" y="308.69" width="106.216" height="282.136"/>
+  <object id="2" x="160.983" y="572.57" width="97.9178" height="267.199"/>
+  <object id="3" x="263.88" y="731.894" width="74.6831" height="96.2582"/>
+  <object id="4" x="333.584" y="831.471" width="366.777" height="106.216"/>
+  <object id="5" x="980.837" y="834.791" width="466.354" height="101.237"/>
+  <object id="6" x="1433.91" y="572.57" width="114.514" height="267.199"/>
+  <object id="7" x="1518.56" y="312.009" width="76.3427" height="260.561"/>
+  <object id="8" x="1422.3" y="96.2582" width="96.2582" height="365.117"/>
+  <object id="9" x="1115.27" y="-8.29812" width="310.35" height="302.051"/>
+  <object id="10" x="552.655" y="-6.63849" width="559.293" height="76.3427"/>
+  <object id="11" x="234.007" y="96.2582" width="330.265" height="182.559"/>
+  <object id="12" x="157.664" y="280.476" width="106.216" height="151.026"/>
+  <object id="13" x="380.054" y="609.082" width="184.218" height="141.068"/>
+  <object id="14" x="1120.25" y="607.422" width="182.559" height="146.047"/>
+  <object id="15" x="1362.55" y="761.767" width="28.2136" height="66.3849"/>
+ </objectgroup>
+ <objectgroup id="4" name="portais">
+  <object id="16" x="1259.65" y="419.885" width="91.2793" height="134.43">
+   <properties>
+    <property name="destino" value="fase2"/>
+    <property name="spawnX" type="int" value="280"/>
+    <property name="spawnY" type="int" value="200"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

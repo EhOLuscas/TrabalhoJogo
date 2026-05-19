@@ -1,3 +1,5 @@
+require "constantes"
+
 local movimento = {}
 
 function movimento.atualizar(dt, jogador, world)

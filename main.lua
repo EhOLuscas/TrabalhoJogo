@@ -1,57 +1,39 @@
--- Importações
-local sti = require "libs.sti"
-local bump = require "libs.bump"
-local jogador = require "entidades.jogador"
-local colisao = require "sistemas.colisao"
-local movimento = require "sistemas.movimento"
-local render = require "sistemas.render"
-local camera = require "sistemas.camera"
-
 require "constantes"
 
-local world
-local mapa
-local imagemMapa
+local menu = require "estados.menu"
+
+estadoAtual = menu
 
 function love.load()
-    -- Mundo do bump
-    world = bump.newWorld(32)
 
-    -- Carrega mapa
-    mapa = sti("mapas/fase1/mapa_polvo.lua")
-
-    -- Carrega imagem REAL do mapa
-    imagemMapa = LG.newImage("mapas/fase1/mapa_polvo.png")
-
-    -- Centro REAL da imagem
-    jogador.x = imagemMapa:getWidth() / 2 - jogador.w / 2
-    jogador.y = imagemMapa:getHeight() / 2 - jogador.h / 2
-
-    -- Adiciona jogador no mundo
-    world:add(
-        jogador,
-        jogador.x,
-        jogador.y,
-        jogador.w,
-        jogador.h
-    )
-
-    -- Camada de colisões do Tiled
-    colisao.carregar(world, mapa)
+    if estadoAtual.load then
+        estadoAtual.load()
+    end
 end
 
 function love.update(dt)
-    movimento.atualizar(dt, jogador, world)
 
-    camera.atualizar(jogador, imagemMapa)
+    if estadoAtual.update then
+        estadoAtual.update(dt)
+    end
 end
 
 function love.draw()
-    camera.aplicar()
 
-    render.desenharMapa(imagemMapa)
+    if estadoAtual.draw then
+        estadoAtual.draw()
+    end
+end
 
-    render.desenharJogador(jogador)
+function love.keypressed(key)
 
-    camera.remover()
+    if estadoAtual.keypressed then
+        estadoAtual.keypressed(key)
+    end
+end
+
+function love.mousepressed(x, y, button)
+    if estadoAtual.mousepressed then
+        estadoAtual.mousepressed(x, y, button)
+    end
 end

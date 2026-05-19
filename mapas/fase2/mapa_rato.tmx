@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="54" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="24">
+ <editorsettings>
+  <export target="mapa_rato.lua" format="lua"/>
+ </editorsettings>
+ <imagelayer id="2" name="imagem_mapa">
+  <image source="mapa_rato.png" width="1344" height="800"/>
+ </imagelayer>
+ <objectgroup id="3" name="colisoes">
+  <object id="1" x="11" y="311" width="99" height="393"/>
+  <object id="10" x="16" y="138.667" width="225.333" height="161.333"/>
+  <object id="11" x="13.3333" y="13.3333" width="420" height="114.667"/>
+  <object id="12" x="352" y="141.333" width="82.6667" height="118.667"/>
+  <object id="14" x="434.667" y="129.333" width="682.667" height="140"/>
+  <object id="15" x="654.667" y="269.333" width="474.667" height="34.6667"/>
+  <object id="16" x="869.333" y="312" width="473.333" height="58.6667"/>
+  <object id="17" x="1109.33" y="373.333" width="232" height="53.3333"/>
+  <object id="18" x="1221.33" y="428" width="113.333" height="182.667"/>
+  <object id="19" x="116" y="554.667" width="430.667" height="201.333"/>
+  <object id="20" x="546.667" y="698.667" width="446.667" height="93.3333"/>
+  <object id="21" x="793.333" y="658.667" width="470.667" height="42.6667"/>
+  <object id="22" x="884" y="625.333" width="60" height="30.6667"/>
+  <object id="23" x="1041.33" y="605.333" width="297.333" height="54.6667"/>
+ </objectgroup>
+</map>
