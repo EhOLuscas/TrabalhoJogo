@@ -9,6 +9,8 @@ local camera = require "sistemas.camera"
 local gerenciadorMapas = require "sistemas.gerenciadorMapas"
 local pausa = require "estados.pausa"
 local portais = require "sistemas.portais"
+local projeteis = require "sistemas.projeteis"
+local combate = require "sistemas.combate"
 
 local jogo = {}
 
@@ -17,6 +19,11 @@ local paredesAtuais = {}
 
 -- Declarada antes de ser usada em jogo.update e jogo.load
 local function trocarMapa(nomeMapa, spawnX, spawnY)
+    if nomeMapa == "fase2" then
+        jogador.canhaoDesbloqueado = true
+        jogador.arma = "canhao"
+    end
+
     gerenciadorMapas.trocar(nomeMapa)
 
     local mapaAtual = gerenciadorMapas.atual
@@ -32,8 +39,8 @@ local function trocarMapa(nomeMapa, spawnX, spawnY)
     paredesAtuais = colisao.carregar(world, mapaAtual.mapa)
 
     -- Posiciona jogador no spawn definido pelo portal (ou posição padrão)
-    jogador.x = spawnX or 100
-    jogador.y = spawnY or (mapaAtual.imagem:getHeight() / 2)
+    jogador.x = spawnX
+    jogador.y = spawnY
 
     world:update(
         jogador,
@@ -55,11 +62,13 @@ function jogo.load()
 
     gerenciadorMapas.carregar()
 
+    jogador.carregarSprites()
+
     local mapaAtual = gerenciadorMapas.atual
 
-    -- Spawn inicial no centro-esquerda do mapa
-    jogador.x = 400
-    jogador.y = mapaAtual.imagem:getHeight() / 2
+    -- Spawn inicial no centro do circulo
+    jogador.x = mapaAtual.imagem:getWidth() / 2 - 30
+    jogador.y = mapaAtual.imagem:getHeight() - 250
 
     world:add(
         jogador,
@@ -69,7 +78,7 @@ function jogo.load()
         jogador.h
     )
 
-    -- Carrega colisões da fase1
+    -- Carrega colisões
     paredesAtuais = colisao.carregar(world, mapaAtual.mapa)
 
     -- Carrega portais definidos no Tiled (camada "portais")
@@ -77,41 +86,35 @@ function jogo.load()
 end
 
 function jogo.update(dt)
-    movimento.atualizar(
-        dt,
-        jogador,
-        world
-    )
+    movimento.atualizar(dt, jogador, world, camera)
+    combate.atualizar(dt, jogador, camera, projeteis)
+    projeteis.update(dt)
 
-    camera.atualizar(
-        jogador,
-        gerenciadorMapas.atual.imagem
-    )
+    camera.atualizar(jogador, gerenciadorMapas.atual.imagem)
 
-    portais.update(
-        jogador,
-        trocarMapa
-    )
+    portais.update(jogador, trocarMapa)
 end
 
 function jogo.draw()
-
     camera.aplicar()
-
-    render.desenharMapa(
-        gerenciadorMapas.atual.imagem
-    )
-
+    render.desenharMapa(gerenciadorMapas.atual.imagem)
     portais.draw()
-
     render.desenharJogador(jogador)
-
+    projeteis.draw()
     camera.remover()
 end
 
 function jogo.keypressed(key)
     if key == "escape" then
         estadoAtual = pausa
+    end
+
+    if key == "q" and jogador.canhaoDesbloqueado then
+        if jogador.arma == "espada" then
+            jogador.arma = "canhao"
+        else
+            jogador.arma = "espada"
+        end
     end
 end
 

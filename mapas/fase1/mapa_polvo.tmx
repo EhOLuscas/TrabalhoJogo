@@ -1,30 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="54" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="17">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="41" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="54">
  <editorsettings>
   <export target="mapa_polvo.lua" format="lua"/>
  </editorsettings>
  <imagelayer id="2" name="imagem_mapa">
-  <image source="mapa_polvo.png" width="1675" height="939"/>
+  <image source="mapa_polvo.png" width="1316" height="1195"/>
  </imagelayer>
  <objectgroup id="3" name="colisoes">
-  <object id="1" x="54.7676" y="308.69" width="106.216" height="282.136"/>
-  <object id="2" x="160.983" y="572.57" width="97.9178" height="267.199"/>
-  <object id="3" x="263.88" y="731.894" width="74.6831" height="96.2582"/>
-  <object id="4" x="333.584" y="831.471" width="366.777" height="106.216"/>
-  <object id="5" x="980.837" y="834.791" width="466.354" height="101.237"/>
-  <object id="6" x="1433.91" y="572.57" width="114.514" height="267.199"/>
-  <object id="7" x="1518.56" y="312.009" width="76.3427" height="260.561"/>
-  <object id="8" x="1422.3" y="96.2582" width="96.2582" height="365.117"/>
-  <object id="9" x="1115.27" y="-8.29812" width="310.35" height="302.051"/>
-  <object id="10" x="552.655" y="-6.63849" width="559.293" height="76.3427"/>
-  <object id="11" x="234.007" y="96.2582" width="330.265" height="182.559"/>
-  <object id="12" x="157.664" y="280.476" width="106.216" height="151.026"/>
-  <object id="13" x="380.054" y="609.082" width="184.218" height="141.068"/>
-  <object id="14" x="1120.25" y="607.422" width="182.559" height="146.047"/>
-  <object id="15" x="1362.55" y="761.767" width="28.2136" height="66.3849"/>
+  <object id="1" x="88.1009" y="442.023" width="106.216" height="198.136"/>
+  <object id="5" x="744.67" y="636.458" width="359.854" height="35.237"/>
+  <object id="9" x="857.27" y="78.7019" width="310.35" height="122.051"/>
+  <object id="10" x="403.655" y="12.3615" width="460.626" height="76.3427"/>
+  <object id="11" x="182.007" y="24.2582" width="248.932" height="182.559"/>
+  <object id="12" x="92.3307" y="183.143" width="106.216" height="151.026"/>
+  <object id="14" x="1091.25" y="441.422" width="93.2257" height="190.047"/>
+  <object id="18" x="110.667" y="338.667" width="9.33333" height="104"/>
+  <object id="19" x="1164" y="325.333" width="17.3333" height="113.333"/>
+  <object id="21" x="182.667" y="632" width="361.833" height="41.5"/>
+  <object id="23" x="545.5" y="610" width="32.5" height="80.5"/>
+  <object id="24" x="705.5" y="608.5" width="37.5" height="86.5"/>
+  <object id="26" x="767" y="656.5" width="20" height="143"/>
+  <object id="27" x="490.5" y="655" width="26.5" height="145"/>
+  <object id="28" x="516" y="770.667" width="39.3333" height="88"/>
+  <object id="29" x="726.667" y="768.667" width="36" height="89.3333"/>
+  <object id="30" x="803.333" y="911.333" width="24.6667" height="30"/>
+  <object id="31" x="477.333" y="857.333" width="32" height="39.3333"/>
+  <object id="32" x="432" y="960.667" width="24" height="36.6667"/>
+  <object id="35" x="762.667" y="805.333" width="64.6667" height="47.3333"/>
+  <object id="37" x="798" y="828" width="76" height="50"/>
+  <object id="38" x="831.333" y="855.333" width="52.6667" height="48"/>
+  <object id="39" x="864.667" y="893.333" width="47.3333" height="158"/>
+  <object id="40" x="498" y="1110" width="272.667" height="57.3333"/>
+  <object id="41" x="755.333" y="1070.67" width="80.6667" height="36.6667"/>
+  <object id="42" x="832" y="1057.33" width="52" height="27.3333"/>
+  <object id="43" x="845.333" y="1036.67" width="37.3333" height="26"/>
+  <object id="44" x="446.333" y="804.331" width="64.6667" height="47.3333"/>
+  <object id="45" x="399.667" y="826.998" width="76" height="50"/>
+  <object id="46" x="389.667" y="854.331" width="52.6667" height="48"/>
+  <object id="47" x="361.666" y="892.331" width="47.3333" height="158"/>
+  <object id="48" x="437.667" y="1069.67" width="80.6667" height="36.6667"/>
+  <object id="49" x="389.667" y="1056.33" width="52" height="27.3333"/>
+  <object id="50" x="391" y="1035.67" width="37.3333" height="26"/>
+  <object id="51" x="1085.33" y="202.667" width="93.3333" height="120"/>
  </objectgroup>
  <objectgroup id="4" name="portais">
-  <object id="16" x="1259.65" y="419.885" width="91.2793" height="134.43">
+  <object id="16" x="944.317" y="251.552" width="56.946" height="87.43">
    <properties>
     <property name="destino" value="fase2"/>
     <property name="spawnX" type="int" value="280"/>

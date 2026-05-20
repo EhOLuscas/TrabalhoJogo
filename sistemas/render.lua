@@ -5,19 +5,7 @@ function render.desenharMapa(imagemMapa)
 end
 
 function render.desenharJogador(jogador)
-    function render.desenharJogador(jogador)
-        LG.setColor(1, 0.2, 0.2)
-
-        LG.rectangle(
-            "fill",
-            jogador.x,
-            jogador.y,
-            jogador.w,
-            jogador.h
-        )
-
-        LG.setColor(1, 1, 1)
-    end
+    jogador.draw()
 end
 
 return render
