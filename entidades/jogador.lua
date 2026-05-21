@@ -8,9 +8,24 @@ jogador.w = 32
 jogador.h = 48
 jogador.velocidade = 175
 
+jogador.vida = 100
+jogador.vidaMax = 100
+
+jogador.energia = 100
+jogador.energiaMax = 100
+jogador.energiaRegen = 15  -- regenera 15 por segundo
+
 jogador.arma = "espada"
 jogador.canhaoDesbloqueado = false
 jogador.virandoDireita = true
+
+-- Invencibilidade e piscar ao tomar dano
+jogador.invencivel = false
+jogador.timerInvencivel = 0
+jogador.duracaoInvencivel = 0.8   -- segundos de invencibilidade
+jogador.timerPiscar = 0
+jogador.intervaloPiscar = 0.02    -- velocidade do piscar (segundos)
+jogador.mostrarSprite = true
 
 jogador.anim = {
     frame = 1,
@@ -37,6 +52,14 @@ function jogador.carregarSprites()
     for nome, _ in pairs(frameCount) do
         sheets[nome] = LG.newImage("sprites/" .. nome .. ".png")
     end
+
+    shaderBranco = LG.newShader([[
+        vec4 effect(vec4 color, Image tex, vec2 texCoords, vec2 screenCoords) {
+            vec4 pixel = Texel(tex, texCoords);
+            if (pixel.a < 0.01) discard;
+            return vec4(1.0, 1.0, 1.0, pixel.a);
+        }
+    ]])
 end
 
 function jogador.getAnimAtual()
@@ -74,7 +97,7 @@ function jogador.updateAnim(dt, movendo, atacando)
     local total = frameCount[nomeAnim]
 
     anim.timer = anim.timer + dt
-    if anim.timer >= 1 / anim.fps then
+    if anim.timer >= 0.5 / anim.fps then
         anim.timer = 0
         anim.frame = anim.frame + 1
         if anim.frame > total then
@@ -82,6 +105,23 @@ function jogador.updateAnim(dt, movendo, atacando)
             if anim.estado == "atacando" then
                 anim.estado = "idle"
             end
+        end
+    end
+end
+
+function jogador.updateDano(dt)
+    if jogador.invencivel then
+        jogador.timerInvencivel = jogador.timerInvencivel - dt
+        jogador.timerPiscar = jogador.timerPiscar - dt
+
+        if jogador.timerPiscar <= 0 then
+            jogador.timerPiscar = jogador.intervaloPiscar
+            jogador.mostrarSprite = not jogador.mostrarSprite
+        end
+
+        if jogador.timerInvencivel <= 0 then
+            jogador.invencivel = false
+            jogador.mostrarSprite = true
         end
     end
 end
@@ -103,12 +143,20 @@ function jogador.draw()
         sheet:getWidth(), sheet:getHeight()
     )
 
+    local usarBranco = jogador.invencivel and jogador.mostrarSprite
+
+    if usarBranco and shaderBranco then
+        LG.setShader(shaderBranco)
+    end
+
     LG.setColor(1, 1, 1)
     if jogador.virandoDireita then
         LG.draw(sheet, quad, jogador.x - ox, jogador.y - oy, 0, escala, escala)
     else
         LG.draw(sheet, quad, jogador.x + jogador.w + ox, jogador.y - oy, 0, -escala, escala)
     end
+
+    LG.setShader()
 end
 
 return jogador

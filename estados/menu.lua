@@ -17,7 +17,7 @@ function menu.load()
             h = 100,
             hover = false,
             acao = function()
-                estadoAtual = require "estados.jogo"
+                estadoAtual = require "estados.cutscene"
                 if estadoAtual.load then
                     estadoAtual.load()
                 end
@@ -77,7 +77,7 @@ end
 
 function menu.keypressed(key)
     if key == "return" then
-        estadoAtual = require "estados.jogo"
+        estadoAtual = require "estados.cutscene"
         if estadoAtual.load then
             estadoAtual.load()
         end

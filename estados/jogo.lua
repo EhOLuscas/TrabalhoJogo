@@ -7,15 +7,17 @@ local movimento = require "sistemas.movimento"
 local render = require "sistemas.render"
 local camera = require "sistemas.camera"
 local gerenciadorMapas = require "sistemas.gerenciadorMapas"
-local pausa = require "estados.pausa"
 local portais = require "sistemas.portais"
 local projeteis = require "sistemas.projeteis"
 local combate = require "sistemas.combate"
+local hud = require "sistemas.hud"
 
 local jogo = {}
 
 local world
 local paredesAtuais = {}
+
+local timerDanoTeste = 10
 
 -- Declarada antes de ser usada em jogo.update e jogo.load
 local function trocarMapa(nomeMapa, spawnX, spawnY)
@@ -64,6 +66,11 @@ function jogo.load()
 
     jogador.carregarSprites()
 
+    jogador.vida = 100
+    jogador.energia = 100
+
+    hud.carregar()
+
     local mapaAtual = gerenciadorMapas.atual
 
     -- Spawn inicial no centro do circulo
@@ -86,13 +93,49 @@ function jogo.load()
 end
 
 function jogo.update(dt)
-    movimento.atualizar(dt, jogador, world, camera)
-    combate.atualizar(dt, jogador, camera, projeteis)
+    -- Teste de dano
+    timerDanoTeste = timerDanoTeste - dt
+    if timerDanoTeste <= 0 then
+        timerDanoTeste = 2
+        combate.receberDano(jogador, 15)
+    end
+
+    movimento.atualizar(
+        dt,
+        jogador,
+        world,
+        camera
+    )
+
+    combate.atualizar(
+        dt,
+        jogador,
+        camera,
+        projeteis
+    )
+
     projeteis.update(dt)
 
-    camera.atualizar(jogador, gerenciadorMapas.atual.imagem)
+    -- HUD
+    hud.update(dt)
 
-    portais.update(jogador, trocarMapa)
+    -- Gameover
+    if jogador.vida <= 0 then
+
+        estadoAtual = require "estados.gameover"
+
+        return
+    end
+
+    camera.atualizar(
+        jogador,
+        gerenciadorMapas.atual.imagem
+    )
+
+    portais.update(
+        jogador,
+        trocarMapa
+    )
 end
 
 function jogo.draw()
@@ -102,11 +145,16 @@ function jogo.draw()
     render.desenharJogador(jogador)
     projeteis.draw()
     camera.remover()
+    hud.draw(jogador)
+
+    LG.setColor(1,1,1)
+    LG.print("vida: " .. jogador.vida, 10, 160)
+    LG.print("energia: " .. jogador.energia, 10, 180)
 end
 
 function jogo.keypressed(key)
     if key == "escape" then
-        estadoAtual = pausa
+        estadoAtual = require "estados.pausa"
     end
 
     if key == "q" and jogador.canhaoDesbloqueado then
