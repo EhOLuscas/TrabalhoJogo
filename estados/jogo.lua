@@ -12,6 +12,8 @@ local projeteis = require "sistemas.projeteis"
 local combate = require "sistemas.combate"
 local hud = require "sistemas.hud"
 local sistemaBruxa = require "sistemas.sistemaBruxa"
+local teletransporte = require "sistemas.teletransporte"
+local dialogo = require "sistemas.dialogo"
 
 local jogo = {}
 
@@ -74,6 +76,8 @@ function jogo.load()
     gerenciadorMapas.carregar()
 
     jogador.carregarSprites()
+    teletransporte.carregar()
+    dialogo.carregar()
 
     jogador.vida = 100
     jogador.energia = 100
@@ -131,6 +135,9 @@ function jogo.update(dt)
     if gerenciadorMapas.atual.nome == "passagem" then
         jogador.vida = jogador.vidaMax
     end
+
+    teletransporte.atualizar(dt, jogador, world)
+    dialogo.atualizar(dt, jogador)
 
     movimento.atualizar(
         dt,
@@ -214,18 +221,37 @@ function jogo.draw()
         for _, ent in ipairs(entidades) do
             ent.draw()
         end
+        teletransporte.draw(jogador)
     else
         render.desenharJogador(jogador)
+        teletransporte.draw(jogador)
     end
     projeteis.draw()
     sistemaBruxa.draw()
+    dialogo.drawWorld()
     camera.remover()
     if gerenciadorMapas.atual.nome ~= "inicio" then
         hud.draw(jogador)
     end
+    dialogo.drawScreen()
 end
 
 function jogo.keypressed(key)
+    if dialogo.ativo then
+        dialogo.keypressed(key)
+        return
+    end
+
+    if key == "e" then
+        print("Tecla E pressionada. Verificando se pode interagir...")
+        local pode = dialogo.podeInteragir(jogador)
+        print("Pode interagir: " .. tostring(pode))
+        if pode then
+            dialogo.iniciar()
+            return
+        end
+    end
+
     if key == "escape" then
         estadoAtual = require "estados.pausa"
     end
@@ -245,7 +271,13 @@ function jogo.keypressed(key)
 end
 
 function jogo.mousepressed(x, y, button)
-    combate.mousepressed(button, jogador, camera, projeteis)
+    if dialogo.ativo then return end
+
+    if button == 2 then
+        teletransporte.tentarTeletransporte(jogador, camera, x, y)
+    else
+        combate.mousepressed(button, jogador, camera, projeteis)
+    end
 end
 
 return jogo

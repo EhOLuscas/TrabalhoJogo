@@ -1,3 +1,4 @@
+io.stdout:setvbuf("no")
 require "constantes"
 
 estadoAtual = require "estados.menu"
