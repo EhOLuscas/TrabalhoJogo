@@ -12,9 +12,11 @@ local projeteis = require "sistemas.projeteis"
 local combate = require "sistemas.combate"
 local hud = require "sistemas.hud"
 local sistemaBruxa = require "sistemas.sistemaBruxa"
-local sistemaBoss  = require "sistemas.sistemaBoss"
 local teletransporte = require "sistemas.teletransporte"
 local dialogo = require "sistemas.dialogo"
+local bossPolvo = require "entidades.bossPolvo"
+local bossRato = require "entidades.bossRato"
+local hudBoss = require "sistemas.hudBoss"
 
 local jogo = {}
 
@@ -64,18 +66,9 @@ local function trocarMapa(nomeMapa, spawnX, spawnY)
     -- Reseta sistema da bruxa para a nova fase
     sistemaBruxa.reset()
 
-    -- Reseta e inicia boss se entrar em fase com boss
-    sistemaBoss.reset()
-    if nomeMapa == "fase1" then
-        -- Spawn do boss polvo: centro do mapa, um pouco acima
-        local img = gerenciadorMapas.mapas.fase1.imagem
-        -- Polvo: posicionado no buraco da parte SUPERIOR da arena
-        sistemaBoss.iniciar("polvo", img:getWidth() / 2 - 45, 180)
-    elseif nomeMapa == "fase2" then
-        local img = gerenciadorMapas.mapas.fase2.imagem
-        -- Rato: posicionado nas colunas da parte SUPERIOR da arena
-        sistemaBoss.iniciar("rato", img:getWidth() / 2 - 35, 150)
-    end
+    -- Reseta bosses ao trocar de mapa
+    bossPolvo.reset()
+    bossRato.reset()
 
     camera.atualizar(
         jogador,
@@ -127,9 +120,11 @@ function jogo.load()
     sistemaBruxa.carregar()
     sistemaBruxa.reset()
 
-    -- Inicializa sistema de boss
-    sistemaBoss.carregar()
-    sistemaBoss.reset()
+    -- Carrega e reseta bosses
+    bossPolvo.carregar()
+    bossPolvo.reset()
+    bossRato.carregar()
+    bossRato.reset()
 
     -- Carrega imagem dos guardiões
     npcGuardiaoImg = LG.newImage("sprites/npc/Guardiao-teletransporte.png")
@@ -164,8 +159,17 @@ function jogo.update(dt)
     -- Atualiza sistema da bruxa e cura
     sistemaBruxa.atualizar(dt, jogador, camera, projeteis)
 
-    -- Atualiza boss
-    sistemaBoss.atualizar(dt, jogador, combate, projeteis)
+    -- Bosses
+    local mapaNome = gerenciadorMapas.atual.nome
+    if mapaNome == "fase1" then
+        bossPolvo.atualizar(dt, jogador, combate)
+        bossPolvo.verificarDanoProjeteis(projeteis.lista)
+        bossPolvo.verificarDanoEspada(jogador)
+    elseif mapaNome == "fase2" then
+        bossRato.atualizar(dt, jogador, combate)
+        bossRato.verificarDanoProjeteis(projeteis.lista)
+        bossRato.verificarDanoEspada(jogador)
+    end
 
     -- HUD
     hud.update(dt)
@@ -236,12 +240,21 @@ function jogo.draw()
         teletransporte.draw(jogador)
     end
     projeteis.draw()
-    sistemaBoss.draw()
     sistemaBruxa.draw()
+    -- Bosses
+    local mapaNome = gerenciadorMapas.atual.nome
+    if mapaNome == "fase1" then bossPolvo.draw() end
+    if mapaNome == "fase2" then bossRato.draw() end
     dialogo.drawWorld()
     camera.remover()
     if gerenciadorMapas.atual.nome ~= "inicio" then
         hud.draw(jogador)
+    end
+    -- HUD dos bosses
+    if gerenciadorMapas.atual.nome == "fase1" then
+        hudBoss.draw(bossPolvo, "polvo")
+    elseif gerenciadorMapas.atual.nome == "fase2" then
+        hudBoss.draw(bossRato, "rato")
     end
     dialogo.drawScreen()
 end
