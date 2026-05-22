@@ -16,6 +16,9 @@ function combate.atualizar(dt, jogador, camera, projeteis)
         )
     end
 
+    local dialogo = require "sistemas.dialogo"
+    if dialogo.ativo or jogador.teleportando then return end
+
     -- Tiro consecutivo do canhão ao segurar mouse1 (botão 1)
     if jogador.arma == "canhao" and love.mouse.isDown(1) then
         custoAtaque = 20
@@ -35,7 +38,10 @@ function combate.atualizar(dt, jogador, camera, projeteis)
 end
 
 function combate.mousepressed(button, jogador, camera, projeteis)
-    custoAtaque = (jogador.arma == "canhao") and 20 or 15
+    local dialogo = require "sistemas.dialogo"
+    if dialogo.ativo or jogador.teleportando then return end
+
+    local custoAtaque = (jogador.arma == "canhao") and 20 or 15
 
     if button == 1 and jogador.anim.estado ~= "atacando" and jogador.energia >= custoAtaque then
         jogador.anim.estado = "atacando"

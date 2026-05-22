@@ -12,6 +12,9 @@ local projeteis = require "sistemas.projeteis"
 local combate = require "sistemas.combate"
 local hud = require "sistemas.hud"
 local sistemaBruxa = require "sistemas.sistemaBruxa"
+local sistemaBoss  = require "sistemas.sistemaBoss"
+local teletransporte = require "sistemas.teletransporte"
+local dialogo = require "sistemas.dialogo"
 
 local jogo = {}
 
@@ -61,6 +64,19 @@ local function trocarMapa(nomeMapa, spawnX, spawnY)
     -- Reseta sistema da bruxa para a nova fase
     sistemaBruxa.reset()
 
+    -- Reseta e inicia boss se entrar em fase com boss
+    sistemaBoss.reset()
+    if nomeMapa == "fase1" then
+        -- Spawn do boss polvo: centro do mapa, um pouco acima
+        local img = gerenciadorMapas.mapas.fase1.imagem
+        -- Polvo: posicionado no buraco da parte SUPERIOR da arena
+        sistemaBoss.iniciar("polvo", img:getWidth() / 2 - 45, 180)
+    elseif nomeMapa == "fase2" then
+        local img = gerenciadorMapas.mapas.fase2.imagem
+        -- Rato: posicionado nas colunas da parte SUPERIOR da arena
+        sistemaBoss.iniciar("rato", img:getWidth() / 2 - 35, 150)
+    end
+
     camera.atualizar(
         jogador,
         mapaAtual.imagem
@@ -73,6 +89,8 @@ function jogo.load()
     gerenciadorMapas.carregar()
 
     jogador.carregarSprites()
+    teletransporte.carregar()
+    dialogo.carregar()
 
     jogador.vida = 100
     jogador.energia = 100
@@ -109,6 +127,10 @@ function jogo.load()
     sistemaBruxa.carregar()
     sistemaBruxa.reset()
 
+    -- Inicializa sistema de boss
+    sistemaBoss.carregar()
+    sistemaBoss.reset()
+
     -- Carrega imagem dos guardiões
     npcGuardiaoImg = LG.newImage("sprites/npc/Guardiao-teletransporte.png")
     npcEspadaImg = LG.newImage("sprites/npc/Guardião-espada.png")
@@ -119,6 +141,9 @@ function jogo.update(dt)
     if gerenciadorMapas.atual.nome == "passagem" then
         jogador.vida = jogador.vidaMax
     end
+
+    teletransporte.atualizar(dt, jogador, world)
+    dialogo.atualizar(dt, jogador)
 
     movimento.atualizar(
         dt,
@@ -138,6 +163,9 @@ function jogo.update(dt)
 
     -- Atualiza sistema da bruxa e cura
     sistemaBruxa.atualizar(dt, jogador, camera, projeteis)
+
+    -- Atualiza boss
+    sistemaBoss.atualizar(dt, jogador, combate, projeteis)
 
     -- HUD
     hud.update(dt)
@@ -202,18 +230,38 @@ function jogo.draw()
         for _, ent in ipairs(entidades) do
             ent.draw()
         end
+        teletransporte.draw(jogador)
     else
         render.desenharJogador(jogador)
+        teletransporte.draw(jogador)
     end
     projeteis.draw()
+    sistemaBoss.draw()
     sistemaBruxa.draw()
+    dialogo.drawWorld()
     camera.remover()
     if gerenciadorMapas.atual.nome ~= "inicio" then
         hud.draw(jogador)
     end
+    dialogo.drawScreen()
 end
 
 function jogo.keypressed(key)
+    if dialogo.ativo then
+        dialogo.keypressed(key)
+        return
+    end
+
+    if key == "e" then
+        print("Tecla E pressionada. Verificando se pode interagir...")
+        local pode = dialogo.podeInteragir(jogador)
+        print("Pode interagir: " .. tostring(pode))
+        if pode then
+            dialogo.iniciar()
+            return
+        end
+    end
+
     if key == "escape" then
         estadoAtual = require "estados.pausa"
     end
@@ -233,7 +281,13 @@ function jogo.keypressed(key)
 end
 
 function jogo.mousepressed(x, y, button)
-    combate.mousepressed(button, jogador, camera, projeteis)
+    if dialogo.ativo then return end
+
+    if button == 2 then
+        teletransporte.tentarTeletransporte(jogador, camera, x, y)
+    else
+        combate.mousepressed(button, jogador, camera, projeteis)
+    end
 end
 
 return jogo

@@ -1,4 +1,5 @@
 require "constantes"
+local sistemaBoss = require "sistemas.sistemaBoss"
 
 local hud = {}
 
@@ -132,15 +133,10 @@ function hud.draw(jogador)
         imgCoracao:getHeight()
     )
 
-    LG.draw(
-        imgCoracao,
-        quadCoracao,
-        x,
-        y,
-        0,
-        escalaHud,
-        escalaHud
-    )
+    LG.draw(imgCoracao, quadCoracao, x, y, 0, escalaHud, escalaHud)
+
+    -- BARRA DE VIDA DO BOSS (parte inferior, centralizada)
+    sistemaBoss.drawHudBoss()
 end
 
 return hud

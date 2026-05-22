@@ -20,6 +20,16 @@ jogador.canhaoDesbloqueado = false
 jogador.virandoDireita = true
 jogador.movendo = false
 
+-- Estados do teletransporte
+jogador.teleportando = false
+jogador.teleportandoFase = ""
+jogador.teleportandoTimer = 0
+jogador.teleportandoFrame = 1
+jogador.teleportandoOrigemX = 0
+jogador.teleportandoOrigemY = 0
+jogador.teleportandoDestinoX = 0
+jogador.teleportandoDestinoY = 0
+
 -- Invencibilidade e piscar ao tomar dano
 jogador.invencivel = false
 jogador.timerInvencivel = 0
@@ -228,6 +238,10 @@ function jogador.getMuzzlePosition()
 end
 
 function jogador.draw()
+    if jogador.teleportando and jogador.teleportandoFase == "entrada" then
+        return
+    end
+
     local nomeAnim = jogador.getAnimAtual()
     local sheet = sheets[nomeAnim]
     if not sheet then return end

@@ -3,6 +3,17 @@ require "constantes"
 local movimento = {}
 
 function movimento.atualizar(dt, jogador, world, camera)
+    local dialogo = require "sistemas.dialogo"
+    if dialogo.ativo then
+        jogador.updateAnim(dt, false, false)
+        return
+    end
+
+    if jogador.teleportando then
+        jogador.updateAnim(dt, false, false)
+        return
+    end
+
     local dx = 0
     local dy = 0
     local movendo = false
