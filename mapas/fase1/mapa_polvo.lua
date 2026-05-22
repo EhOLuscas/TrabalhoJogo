@@ -563,9 +563,9 @@ return {
           opacity = 1,
           visible = true,
           properties = {
-            ["destino"] = "fase2",
-            ["spawnX"] = 280,
-            ["spawnY"] = 200
+            ["destino"] = "passagem",
+            ["spawnX"] = 114,
+            ["spawnY"] = 512
           }
         }
       }

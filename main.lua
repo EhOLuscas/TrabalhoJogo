@@ -3,7 +3,6 @@ require "constantes"
 estadoAtual = require "estados.menu"
 
 function love.load()
-
     if estadoAtual.load then
         estadoAtual.load()
     end
@@ -20,7 +19,7 @@ function love.draw()
 
     if estadoAtual.draw then
         estadoAtual.draw()
-    end
+  end
 end
 
 function love.keypressed(key)

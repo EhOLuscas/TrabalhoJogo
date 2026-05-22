@@ -16,13 +16,28 @@ function combate.atualizar(dt, jogador, camera, projeteis)
         )
     end
 
-    if jogador.arma == "canhao" then
-        custoAtaque = 20
-    else
-        custoAtaque = 15
-    end
+    -- Tiro consecutivo do canhão ao segurar mouse1 (botão 1)
+    if jogador.arma == "canhao" and love.mouse.isDown(1) then
+        local custoAtaque = 20
+        if jogador.anim.estado ~= "atacando" and jogador.energia >= custoAtaque then
+            jogador.anim.estado = "atacando"
+            jogador.anim.frame = 1
+            jogador.anim.timer = 0
+            jogador.energia = jogador.energia - custoAtaque
 
-    if love.mouse.isDown(1) and jogador.anim.estado ~= "atacando" and jogador.energia >= custoAtaque then
+            if projeteis then
+                local mx, my = love.mouse.getPosition()
+                local origemX, origemY = jogador.getMuzzlePosition()
+                projeteis.disparar(origemX, origemY, mx, my, camera.x, camera.y)
+            end
+        end
+    end
+end
+
+function combate.mousepressed(button, jogador, camera, projeteis)
+    local custoAtaque = (jogador.arma == "canhao") and 20 or 15
+
+    if button == 1 and jogador.anim.estado ~= "atacando" and jogador.energia >= custoAtaque then
         jogador.anim.estado = "atacando"
         jogador.anim.frame = 1
         jogador.anim.timer = 0
@@ -30,9 +45,8 @@ function combate.atualizar(dt, jogador, camera, projeteis)
 
         if jogador.arma == "canhao" and projeteis then
             local mx, my = love.mouse.getPosition()
-            local centroX = jogador.x + jogador.w / 2
-            local centroY = jogador.y + jogador.h / 2
-            projeteis.disparar(centroX, centroY, mx, my, camera.x, camera.y)
+            local origemX, origemY = jogador.getMuzzlePosition()
+            projeteis.disparar(origemX, origemY, mx, my, camera.x, camera.y)
         end
     end
 end

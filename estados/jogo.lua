@@ -11,19 +11,25 @@ local portais = require "sistemas.portais"
 local projeteis = require "sistemas.projeteis"
 local combate = require "sistemas.combate"
 local hud = require "sistemas.hud"
+local sistemaBruxa = require "sistemas.sistemaBruxa"
 
 local jogo = {}
 
 local world
 local paredesAtuais = {}
-
 local timerDanoTeste = 10
+local npcGuardiaoImg
+local npcEspadaImg
 
 -- Declarada antes de ser usada em jogo.update e jogo.load
 local function trocarMapa(nomeMapa, spawnX, spawnY)
     if nomeMapa == "fase2" then
         jogador.canhaoDesbloqueado = true
         jogador.arma = "canhao"
+    end
+
+    if nomeMapa == "passagem" then
+        jogador.vida = jogador.vidaMax
     end
 
     gerenciadorMapas.trocar(nomeMapa)
@@ -53,6 +59,9 @@ local function trocarMapa(nomeMapa, spawnX, spawnY)
     -- Recarrega portais do novo mapa
     portais.carregar(mapaAtual.mapa)
 
+    -- Reseta sistema da bruxa para a nova fase
+    sistemaBruxa.reset()
+
     camera.atualizar(
         jogador,
         mapaAtual.imagem
@@ -73,9 +82,14 @@ function jogo.load()
 
     local mapaAtual = gerenciadorMapas.atual
 
-    -- Spawn inicial no centro do circulo
-    jogador.x = mapaAtual.imagem:getWidth() / 2 - 30
-    jogador.y = mapaAtual.imagem:getHeight() - 250
+    if mapaAtual.nome == "passagem" then
+        jogador.x = 114
+        jogador.y = 512
+    else
+        -- Spawn inicial no centro do circulo
+        jogador.x = mapaAtual.imagem:getWidth() / 2 - 30
+        jogador.y = mapaAtual.imagem:getHeight() - 250
+    end
 
     world:add(
         jogador,
@@ -91,9 +105,32 @@ function jogo.load()
     -- Carrega portais definidos no Tiled (camada "portais")
     portais.carregar(mapaAtual.mapa)
     portais.carregarSprite()
+
+    -- Inicializa e reseta o sistema da bruxa
+    sistemaBruxa.carregar()
+    sistemaBruxa.reset()
+
+    -- Carrega imagem dos guardiões
+    npcGuardiaoImg = LG.newImage("sprites/npc/Guardiao-teletransporte.png")
+    npcEspadaImg = LG.newImage("sprites/npc/Guardião-espada.png")
 end
 
 function jogo.update(dt)
+    -- Dano automático de teste (10 de dano a cada 2 segundos após um delay inicial de 10s)
+    if gerenciadorMapas.atual.nome ~= "inicio" and gerenciadorMapas.atual.nome ~= "passagem" then
+        if timerDanoTeste > 0 then
+            timerDanoTeste = timerDanoTeste - dt
+            if timerDanoTeste <= 0 then
+                combate.receberDano(jogador, 10)
+                timerDanoTeste = 2.0
+            end
+        end
+    end
+
+    -- Recupera o HP durante o mapa de passagem
+    if gerenciadorMapas.atual.nome == "passagem" then
+        jogador.vida = jogador.vidaMax
+    end
 
     movimento.atualizar(
         dt,
@@ -110,6 +147,9 @@ function jogo.update(dt)
     )
 
     projeteis.update(dt)
+
+    -- Atualiza sistema da bruxa e cura
+    sistemaBruxa.atualizar(dt, jogador, camera, projeteis)
 
     -- HUD
     hud.update(dt)
@@ -131,10 +171,58 @@ function jogo.draw()
     camera.aplicar()
     render.desenharMapa(gerenciadorMapas.atual.imagem)
     portais.draw()
-    render.desenharJogador(jogador)
+    -- Desenha jogador e guardiões com ordenação Y no mapa inicial
+    if gerenciadorMapas.atual.nome == "inicio" and npcGuardiaoImg and npcEspadaImg then
+        -- VALORES DE AJUSTE DO GUARDIAO TELETRANSPORTE:
+        local guardiaoEscala = 1.35  -- <-- Altere o tamanho/escala aqui (ex: 1.0, 1.2, 1.5)
+        local guardiaoX = 920        -- <-- Posição X
+        local guardiaoY = 610        -- <-- Posição Y
+        local guardianBottomY = guardiaoY + (128 * guardiaoEscala) * 0.85
+
+        -- VALORES DE AJUSTE DO GUARDIAO ESPADA:
+        local guardiaoEspadaEscala = 1.35  -- <-- Altere o tamanho/escala aqui (ex: 1.0, 1.2, 1.5)
+        local guardiaoEspadaX = 730        -- <-- Posição X (diminuir move para esquerda, aumentar move para direita)
+        local guardiaoEspadaY = 130        -- <-- Posição Y (diminuir move para cima, aumentar move para baixo)
+        local guardianEspadaBottomY = guardiaoEspadaY + (128 * guardiaoEspadaEscala) * 0.85
+
+        -- Tabela com as entidades e seus Ys para ordenação de profundidade
+        local entidades = {
+            {
+                y = jogador.y + jogador.h,
+                draw = function() render.desenharJogador(jogador) end
+            },
+            {
+                y = guardianBottomY,
+                draw = function()
+                    LG.setColor(1, 1, 1)
+                    LG.draw(npcGuardiaoImg, guardiaoX, guardiaoY, 0, guardiaoEscala, guardiaoEscala)
+                end
+            },
+            {
+                y = guardianEspadaBottomY,
+                draw = function()
+                    LG.setColor(1, 1, 1)
+                    LG.draw(npcEspadaImg, guardiaoEspadaX, guardiaoEspadaY, 0, guardiaoEspadaEscala, guardiaoEspadaEscala)
+                end
+            }
+        }
+
+        -- Ordena do menor Y ao maior Y (de trás para a frente)
+        table.sort(entidades, function(a, b) return a.y < b.y end)
+
+        -- Executa o desenho de cada entidade na ordem correta
+        for _, ent in ipairs(entidades) do
+            ent.draw()
+        end
+    else
+        render.desenharJogador(jogador)
+    end
     projeteis.draw()
+    sistemaBruxa.draw()
     camera.remover()
-    hud.draw(jogador)
+    if gerenciadorMapas.atual.nome ~= "inicio" then
+        hud.draw(jogador)
+    end
 end
 
 function jogo.keypressed(key)
@@ -149,6 +237,15 @@ function jogo.keypressed(key)
             jogador.arma = "espada"
         end
     end
+
+    -- Tecla de debug para testar dano (20 de dano por hit)
+    if key == "h" then
+        combate.receberDano(jogador, 20)
+    end
+end
+
+function jogo.mousepressed(x, y, button)
+    combate.mousepressed(button, jogador, camera, projeteis)
 end
 
 return jogo
