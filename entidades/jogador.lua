@@ -51,8 +51,8 @@ local frameCount = {
 local frameRates = {
     idle_canhao     = 8,
     andando_canhao  = 8,
-    atirando_canhao = 8,
-    ataque_espada   = 20,  -- 20 FPS para ataque de espada ser mais rápido
+    atirando_canhao = 40, -- 40 FPS para ataque do canhão ser mais rápido
+    ataque_espada   = 40, -- 40 FPS para ataque de espada ser mais rápido
     andando_espada  = 8,
     idle_espada     = 8,
 }
@@ -181,7 +181,7 @@ function jogador.updateAnim(dt, movendo, atacando)
     local fps = frameRates[nomeAnim] or anim.fps
 
     anim.timer = anim.timer + dt
-    if anim.timer >= 0.5 / fps then
+    if anim.timer >= 1 / fps then
         anim.timer = 0
         anim.frame = anim.frame + 1
         if anim.frame > total then

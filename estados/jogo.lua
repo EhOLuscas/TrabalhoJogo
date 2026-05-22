@@ -17,7 +17,6 @@ local jogo = {}
 
 local world
 local paredesAtuais = {}
-local timerDanoTeste = 10
 local npcGuardiaoImg
 local npcEspadaImg
 
@@ -116,17 +115,6 @@ function jogo.load()
 end
 
 function jogo.update(dt)
-    -- Dano automático de teste (10 de dano a cada 2 segundos após um delay inicial de 10s)
-    if gerenciadorMapas.atual.nome ~= "inicio" and gerenciadorMapas.atual.nome ~= "passagem" then
-        if timerDanoTeste > 0 then
-            timerDanoTeste = timerDanoTeste - dt
-            if timerDanoTeste <= 0 then
-                combate.receberDano(jogador, 10)
-                timerDanoTeste = 2.0
-            end
-        end
-    end
-
     -- Recupera o HP durante o mapa de passagem
     if gerenciadorMapas.atual.nome == "passagem" then
         jogador.vida = jogador.vidaMax
