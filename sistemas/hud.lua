@@ -120,27 +120,27 @@ function hud.draw(jogador)
         )
     end
 
-    -- -- CORAÇÃO
-    -- LG.setColor(1, 1, 1)
+    -- CORAÇÃO
+    LG.setColor(1, 1, 1)
 
-    -- local quadCoracao = LG.newQuad(
-    --     (frameCoracao - 1) * HEART_W,
-    --     0,
-    --     HEART_W,
-    --     HEART_H,
-    --     imgCoracao:getWidth(),
-    --     imgCoracao:getHeight()
-    -- )
+    local quadCoracao = LG.newQuad(
+        (frameCoracao - 1) * HEART_W,
+        0,
+        HEART_W,
+        HEART_H,
+        imgCoracao:getWidth(),
+        imgCoracao:getHeight()
+    )
 
-    -- LG.draw(
-    --     imgCoracao,
-    --     quadCoracao,
-    --     x,
-    --     y,
-    --     0,
-    --     escalaHud,
-    --     escalaHud
-    -- )
+    LG.draw(
+        imgCoracao,
+        quadCoracao,
+        x,
+        y,
+        0,
+        escalaHud,
+        escalaHud
+    )
 end
 
 return hud

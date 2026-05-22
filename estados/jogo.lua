@@ -90,15 +90,10 @@ function jogo.load()
 
     -- Carrega portais definidos no Tiled (camada "portais")
     portais.carregar(mapaAtual.mapa)
+    portais.carregarSprite()
 end
 
 function jogo.update(dt)
-    -- Teste de dano
-    timerDanoTeste = timerDanoTeste - dt
-    if timerDanoTeste <= 0 then
-        timerDanoTeste = 2
-        combate.receberDano(jogador, 15)
-    end
 
     movimento.atualizar(
         dt,
@@ -127,15 +122,9 @@ function jogo.update(dt)
         return
     end
 
-    camera.atualizar(
-        jogador,
-        gerenciadorMapas.atual.imagem
-    )
+    camera.atualizar(jogador, gerenciadorMapas.atual.imagem)
 
-    portais.update(
-        jogador,
-        trocarMapa
-    )
+    portais.update(jogador, trocarMapa, dt)
 end
 
 function jogo.draw()
@@ -146,10 +135,6 @@ function jogo.draw()
     projeteis.draw()
     camera.remover()
     hud.draw(jogador)
-
-    LG.setColor(1,1,1)
-    LG.print("vida: " .. jogador.vida, 10, 160)
-    LG.print("energia: " .. jogador.energia, 10, 180)
 end
 
 function jogo.keypressed(key)
