@@ -65,13 +65,8 @@ function dialogo.podeInteragir(jogador)
             local dx = px - mx
             local dy = py - my
             local dist = math.sqrt(dx * dx + dy * dy)
-            print("podeInteragir - Distancia: " .. dist .. ", Jogador: (" .. px .. ", " .. py .. "), Mago: (" .. mx .. ", " .. my .. ")")
             return dist < 140
-        else
-            print("podeInteragir - Nao esta no mapa inicio, esta em: " .. tostring(mapa.nome))
         end
-    else
-        print("podeInteragir - Mapa atual nulo")
     end
     return false
 end
