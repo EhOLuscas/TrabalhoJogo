@@ -13,7 +13,7 @@ jogador.vidaMax = 100
 
 jogador.energia = 100
 jogador.energiaMax = 100
-jogador.energiaRegen = 15  -- regenera 15 por segundo
+jogador.energiaRegen = 20  -- regenera 15 por segundo
 
 jogador.arma = "espada"
 jogador.canhaoDesbloqueado = false

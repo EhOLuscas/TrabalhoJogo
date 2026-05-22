@@ -1,8 +1,6 @@
 require "constantes"
 
-local menu = require "estados.menu"
-
-estadoAtual = menu
+estadoAtual = require "estados.menu"
 
 function love.load()
 
