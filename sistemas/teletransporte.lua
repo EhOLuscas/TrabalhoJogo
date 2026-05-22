@@ -74,10 +74,15 @@ end
 function teletransporte.atualizar(dt, jogador, world)
     if not jogador.teleportando then return end
 
+    -- Invencível durante o teleporte
+    jogador.invencivel = true
+    jogador.timerInvencivel = 0.1
+    jogador.mostrarSprite = true
+
     jogador.teleportandoTimer = jogador.teleportandoTimer + dt
     -- Efeito bem rápido: 82 frames tocados a 150 FPS (~0.55 segundos por fase)
     local fps = 150
-    local interval = 1.0 / fps
+    local interval = 0.5 / fps
 
     while jogador.teleportandoTimer >= interval do
         jogador.teleportandoTimer = jogador.teleportandoTimer - interval
@@ -99,6 +104,7 @@ function teletransporte.atualizar(dt, jogador, world)
             if jogador.teleportandoFrame > #spritesExplosao then
                 -- Finaliza o teletransporte
                 jogador.teleportando = false
+                jogador.invencivel = false
                 break
             end
         end

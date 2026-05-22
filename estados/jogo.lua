@@ -184,13 +184,18 @@ function jogo.update(dt)
 
     camera.atualizar(jogador, gerenciadorMapas.atual.imagem)
 
-    portais.update(jogador, trocarMapa, dt)
+    if mapaNome ~= "fase1" or not bossPolvo.ativo and bossPolvo.vida <= 0 then
+        portais.update(jogador, trocarMapa, dt)
+    end
 end
 
 function jogo.draw()
     camera.aplicar()
     render.desenharMapa(gerenciadorMapas.atual.imagem)
-    portais.draw()
+    local mapaNome = gerenciadorMapas.atual.nome
+    if mapaNome ~= "fase1" or not bossPolvo.ativo and bossPolvo.vida <= 0 then
+        portais.draw()
+    end
     -- Desenha jogador e guardiões com ordenação Y no mapa inicial
     if gerenciadorMapas.atual.nome == "inicio" and npcGuardiaoImg and npcEspadaImg then
         -- VALORES DE AJUSTE DO GUARDIAO TELETRANSPORTE:

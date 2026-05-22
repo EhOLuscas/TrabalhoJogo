@@ -23,9 +23,12 @@ function hudBoss.draw(boss, nome)
     if nome == "polvo" then
         LG.setColor(0.9, 0.1, 0.1)
     else
-        local fase2 = boss.vida <= boss.vidaMax / 2
-        if fase2 then
-            LG.setColor(0.8, 0.1, 0.8) -- roxo na fase2
+        local fase2 = boss.vida <= boss.vidaMax * 0.75
+        local fase3 = boss.vida <= boss.vidaMax * 0.50
+        if fase3 then
+            LG.setColor(1, 0.3, 0.0) -- laranja na fase 3
+        elseif fase2 then
+            LG.setColor(0.8, 0.1, 0.8)
         else
             LG.setColor(0.1, 0.8, 0.1)
         end

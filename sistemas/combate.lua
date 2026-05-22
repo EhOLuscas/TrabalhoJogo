@@ -21,7 +21,7 @@ function combate.atualizar(dt, jogador, camera, projeteis)
 
     -- Tiro consecutivo do canhão ao segurar mouse1 (botão 1)
     if jogador.arma == "canhao" and love.mouse.isDown(1) then
-        custoAtaque = 20
+        custoAtaque = 30
         if jogador.anim.estado ~= "atacando" and jogador.energia >= custoAtaque then
             jogador.anim.estado = "atacando"
             jogador.anim.frame = 1
