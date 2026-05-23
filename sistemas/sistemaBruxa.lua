@@ -1,5 +1,6 @@
 require "constantes"
 local gerenciadorMapas = require "sistemas.gerenciadorMapas"
+local som = require "sistemas.som"
 
 local sistemaBruxa = {}
 
@@ -99,6 +100,7 @@ function sistemaBruxa.atualizar(dt, jogador, camera, projeteis)
         bruxa.ativa = true
         bruxa.frame = 1
         bruxa.timer = 0
+        som.tocar("bruxa")
     end
 
     vidaAnterior = jogador.vida

@@ -21,7 +21,18 @@ function hudBoss.draw(boss, nome)
 
     -- Barra de vida (vermelha para polvo, verde para rato)
     if nome == "Nyx'Thalor" then
-        LG.setColor(0.9, 0.1, 0.1)
+        if boss.corrompido then
+            local t = love.timer.getTime()
+            if math.floor(t * 12) % 3 == 0 then
+                LG.setColor(0.8, 0.0, 0.8)
+            elseif math.floor(t * 12) % 3 == 1 then
+                LG.setColor(0.0, 0.8, 0.8)
+            else
+                LG.setColor(0.9, 0.1, 0.1)
+            end
+        else
+            LG.setColor(0.9, 0.1, 0.1)
+        end
     else
         local fase2 = boss.vida <= boss.vidaMax * 0.75
         local fase3 = boss.vida <= boss.vidaMax * 0.50
@@ -41,8 +52,17 @@ function hudBoss.draw(boss, nome)
     LG.rectangle("line", x, y, largura, altura, 3)
 
     -- Nome do boss
+    local nomeExibido = nome
+    if nome == "Nyx'Thalor" and boss.corrompido then
+        local t = love.timer.getTime()
+        if math.floor(t * 10) % 2 == 0 then
+            nomeExibido = "N¥X'THÅLØR [CØRRØMPIDØ]"
+        else
+            nomeExibido = "N_X'TH_L_R [C_RR_MP_D_]"
+        end
+    end
     LG.setColor(1, 1, 1)
-    LG.printf(nome:upper(), x, y - 20, largura, "center")
+    LG.printf(nomeExibido:upper(), x, y - 20, largura, "center")
 
     LG.setColor(1, 1, 1)
     LG.setLineWidth(1)

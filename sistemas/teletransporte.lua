@@ -1,5 +1,6 @@
 require "constantes"
 local gerenciadorMapas = require "sistemas.gerenciadorMapas"
+local som = require "sistemas.som"
 
 local teletransporte = {}
 
@@ -14,13 +15,7 @@ function teletransporte.carregar()
         local success, img = pcall(LG.newImage, path)
         if success then
             table.insert(spritesExplosao, img)
-        else
-            print("Erro ao carregar sprite: " .. tostring(img))
         end
-    end
-    print("Sprites de explosao carregadas: " .. #spritesExplosao)
-    if #spritesExplosao > 0 then
-        print("Dimensoes da sprite de explosao: " .. spritesExplosao[1]:getWidth() .. "x" .. spritesExplosao[1]:getHeight())
     end
 
     shaderAzul = LG.newShader([[
@@ -68,6 +63,7 @@ function teletransporte.tentarTeletransporte(jogador, camera, mx, my)
 
         jogador.teleportandoDestinoX = targetX
         jogador.teleportandoDestinoY = targetY
+        som.tocar("teletransport")
     end
 end
 

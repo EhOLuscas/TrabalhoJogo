@@ -1,22 +1,33 @@
 require "constantes"
+local musica = require "sistemas.musica"
 
 local cutscene = {}
+
+cutscene.videoPath = "sprites/cutscene-inicial.ogv"
+cutscene.proximoEstado = nil
 
 local video
 local terminado = false
 
 function cutscene.load()
+    musica.parar()
     terminado = false
-    video = love.graphics.newVideo("sprites/cutscene-inicial.ogv")
+    local path = cutscene.videoPath or "sprites/cutscene-inicial.ogv"
+    video = love.graphics.newVideo(path)
     video:play()
 end
 
 function cutscene.update(dt)
-    if not video:isPlaying() or terminado then
+    if not video or not video:isPlaying() or terminado then
         terminado = true
-        local jogo = require "estados.jogo"
-        estadoAtual = jogo
-        if jogo.load then jogo.load() end
+        local proximo = cutscene.proximoEstado or require "estados.jogo"
+        
+        -- Restaura padrões para a próxima execução
+        cutscene.videoPath = "sprites/cutscene-inicial.ogv"
+        cutscene.proximoEstado = nil
+        
+        estadoAtual = proximo
+        if proximo.load then proximo.load() end
     end
 end
 

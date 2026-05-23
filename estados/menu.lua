@@ -8,6 +8,9 @@ local botoes = {}
 function menu.load()
     imagemFundo = LG.newImage("sprites/imagem-menu.png")
 
+    local musica = require "sistemas.musica"
+    musica.tocar("colten")
+
     botoes = {
         {
             label = "INICIAR JOGO",
@@ -17,6 +20,8 @@ function menu.load()
             h = 100,
             hover = false,
             acao = function()
+                local musica = require "sistemas.musica"
+                musica.parar()
                 estadoAtual = require "estados.cutscene"
                 if estadoAtual.load then
                     estadoAtual.load()
@@ -77,6 +82,8 @@ end
 
 function menu.keypressed(key)
     if key == "return" then
+        local musica = require "sistemas.musica"
+        musica.parar()
         estadoAtual = require "estados.cutscene"
         if estadoAtual.load then
             estadoAtual.load()

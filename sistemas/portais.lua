@@ -3,6 +3,7 @@ local portais = {}
 portais.lista = {}
 
 require "constantes"
+local som = require "sistemas.som"
 
 local sheet
 local quads = {}
@@ -47,6 +48,7 @@ function portais.update(jogador, trocarMapa, dt)
             jogador.y + jogador.h > portal.y
 
         if colidiu then
+            som.tocar("passarFase")
             trocarMapa(portal.destino, portal.spawnX, portal.spawnY)
             break
         end

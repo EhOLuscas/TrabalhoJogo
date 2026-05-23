@@ -17,6 +17,11 @@ local dialogo = require "sistemas.dialogo"
 local bossPolvo = require "entidades.bossPolvo"
 local bossRato = require "entidades.bossRato"
 local hudBoss = require "sistemas.hudBoss"
+local gc = require "npc.guerreiro-canhao"
+local ge = require "npc.guerreiro-energia"
+local ga = require "npc.guerreiro-aviso"
+local som = require "sistemas.som"
+local musica = require "sistemas.musica"
 
 local jogo = {}
 
@@ -24,6 +29,9 @@ local world
 local paredesAtuais = {}
 local npcGuardiaoImg
 local npcEspadaImg
+local npcCanhaoImg
+local npcEnergiaImg
+local npcAvisoImg
 
 -- Declarada antes de ser usada em jogo.update e jogo.load
 local function trocarMapa(nomeMapa, spawnX, spawnY)
@@ -84,6 +92,7 @@ function jogo.load()
     jogador.carregarSprites()
     teletransporte.carregar()
     dialogo.carregar()
+    som.carregar()
 
     jogador.vida = 100
     jogador.energia = 100
@@ -129,9 +138,14 @@ function jogo.load()
     -- Carrega imagem dos guardiões
     npcGuardiaoImg = LG.newImage("sprites/npc/Guardiao-teletransporte.png")
     npcEspadaImg = LG.newImage("sprites/npc/Guardião-espada.png")
+    npcCanhaoImg = LG.newImage(gc.retrato)
+    npcEnergiaImg = LG.newImage(ge.retrato)
+    npcAvisoImg = LG.newImage(ga.retrato)
 end
 
 function jogo.update(dt)
+    love.mouse.setVisible(false)
+
     -- Recupera o HP durante o mapa de passagem
     if gerenciadorMapas.atual.nome == "passagem" then
         jogador.vida = jogador.vidaMax
@@ -169,6 +183,18 @@ function jogo.update(dt)
         bossRato.atualizar(dt, jogador, combate)
         bossRato.verificarDanoProjeteis(projeteis.lista)
         bossRato.verificarDanoEspada(jogador)
+
+        if bossRato.fimJogo then
+            bossRato.reset()
+            local cutscene = require "estados.cutscene"
+            cutscene.videoPath = "sprites/cutscine-final.ogv"
+            cutscene.proximoEstado = require "estados.menu"
+            estadoAtual = cutscene
+            if cutscene.load then
+                cutscene.load()
+            end
+            return
+        end
     end
 
     -- HUD
@@ -176,26 +202,44 @@ function jogo.update(dt)
 
     -- Gameover
     if jogador.vida <= 0 then
-
+        musica.parar()
         estadoAtual = require "estados.gameover"
 
         return
     end
 
+    -- Atualiza música de fundo (BGM)
+    if mapaNome == "inicio" or mapaNome == "fase1" then
+        musica.tocar("colten")
+    elseif mapaNome == "passagem" then
+        musica.tocar("michael")
+    elseif mapaNome == "fase2" then
+        if bossRato.derrotado then
+            musica.parar()
+        else
+            musica.tocar("michael")
+        end
+    end
+
     camera.atualizar(jogador, gerenciadorMapas.atual.imagem)
 
-    if mapaNome ~= "fase1" or bossPolvo.morto then
-        portais.update(jogador, trocarMapa, dt)
-    end
+    -- Sempre atualiza portais, permitindo transição da fase 1 mesmo sem derrotar o boss
+    portais.update(jogador, trocarMapa, dt)
+
+    -- Atualiza sons de boss
+    som.atualizarBossSons(
+        mapaNome,
+        bossPolvo.ativo and not bossPolvo.morto,
+        bossRato.ativo and not bossRato.derrotado
+    )
 end
 
 function jogo.draw()
     camera.aplicar()
     render.desenharMapa(gerenciadorMapas.atual.imagem)
     local mapaNome = gerenciadorMapas.atual.nome
-    if mapaNome ~= "fase1" or bossPolvo.morto then
-        portais.draw()
-    end
+    -- Sempre desenha portais
+    portais.draw()
     -- Desenha jogador e guardiões com ordenação Y no mapa inicial
     if gerenciadorMapas.atual.nome == "inicio" and npcGuardiaoImg and npcEspadaImg then
         -- VALORES DE AJUSTE DO GUARDIAO TELETRANSPORTE:
@@ -209,6 +253,12 @@ function jogo.draw()
         local guardiaoEspadaX = 730        -- <-- Posição X (diminuir move para esquerda, aumentar move para direita)
         local guardiaoEspadaY = 130        -- <-- Posição Y (diminuir move para cima, aumentar move para baixo)
         local guardianEspadaBottomY = guardiaoEspadaY + (128 * guardiaoEspadaEscala) * 0.85
+
+        -- VALORES DE AJUSTE DO GUARDIAO ENERGIA:
+        local guardiaoEnergiaEscala = ge.escala
+        local guardiaoEnergiaX = ge.x
+        local guardiaoEnergiaY = ge.y
+        local guardianEnergiaBottomY = guardiaoEnergiaY + (128 * guardiaoEnergiaEscala) * 0.85
 
         -- Tabela com as entidades e seus Ys para ordenação de profundidade
         local entidades = {
@@ -229,6 +279,13 @@ function jogo.draw()
                     LG.setColor(1, 1, 1)
                     LG.draw(npcEspadaImg, guardiaoEspadaX, guardiaoEspadaY, 0, guardiaoEspadaEscala, guardiaoEspadaEscala)
                 end
+            },
+            {
+                y = guardianEnergiaBottomY,
+                draw = function()
+                    LG.setColor(1, 1, 1)
+                    LG.draw(npcEnergiaImg, guardiaoEnergiaX, guardiaoEnergiaY, 0, guardiaoEnergiaEscala, guardiaoEnergiaEscala)
+                end
             }
         }
 
@@ -236,6 +293,46 @@ function jogo.draw()
         table.sort(entidades, function(a, b) return a.y < b.y end)
 
         -- Executa o desenho de cada entidade na ordem correta
+        for _, ent in ipairs(entidades) do
+            ent.draw()
+        end
+        teletransporte.draw(jogador)
+    elseif gerenciadorMapas.atual.nome == "passagem" and npcCanhaoImg and npcAvisoImg then
+        -- VALORES DE AJUSTE DO GUARDIAO CANHAO:
+        local guardiaoCanhaoEscala = gc.escala
+        local guardiaoCanhaoX = gc.x
+        local guardiaoCanhaoY = gc.y
+        local guardianCanhaoBottomY = guardiaoCanhaoY + (128 * guardiaoCanhaoEscala) * 0.85
+
+        -- VALORES DE AJUSTE DO GUARDIAO AVISO:
+        local guardiaoAvisoEscala = ga.escala
+        local guardiaoAvisoX = ga.x
+        local guardiaoAvisoY = ga.y
+        local guardianAvisoBottomY = guardiaoAvisoY + (128 * guardiaoAvisoEscala) * 0.85
+
+        local entidades = {
+            {
+                y = jogador.y + jogador.h,
+                draw = function() render.desenharJogador(jogador) end
+            },
+            {
+                y = guardianCanhaoBottomY,
+                draw = function()
+                    LG.setColor(1, 1, 1)
+                    LG.draw(npcCanhaoImg, guardiaoCanhaoX, guardiaoCanhaoY, 0, guardiaoCanhaoEscala, guardiaoCanhaoEscala)
+                end
+            },
+            {
+                y = guardianAvisoBottomY,
+                draw = function()
+                    LG.setColor(1, 1, 1)
+                    LG.draw(npcAvisoImg, guardiaoAvisoX, guardiaoAvisoY, 0, guardiaoAvisoEscala, guardiaoAvisoEscala)
+                end
+            }
+        }
+
+        table.sort(entidades, function(a, b) return a.y < b.y end)
+
         for _, ent in ipairs(entidades) do
             ent.draw()
         end
@@ -262,6 +359,17 @@ function jogo.draw()
         hudBoss.draw(bossRato, "Vorl'Guth")
     end
     dialogo.drawScreen()
+
+    -- Desenha cursor personalizado (cruz)
+    local mx, my = love.mouse.getPosition()
+    LG.setColor(0, 0.9, 0.9, 0.9) -- ciano
+    LG.setLineWidth(2)
+    LG.line(mx - 10, my, mx - 3, my)
+    LG.line(mx + 3, my, mx + 10, my)
+    LG.line(mx, my - 10, mx, my - 3)
+    LG.line(mx, my + 3, mx, my + 10)
+    LG.circle("line", mx, my, 3)
+    LG.setColor(1, 1, 1, 1)
 end
 
 function jogo.keypressed(key)
@@ -271,9 +379,7 @@ function jogo.keypressed(key)
     end
 
     if key == "e" then
-        print("Tecla E pressionada. Verificando se pode interagir...")
         local pode = dialogo.podeInteragir(jogador)
-        print("Pode interagir: " .. tostring(pode))
         if pode then
             dialogo.iniciar()
             return

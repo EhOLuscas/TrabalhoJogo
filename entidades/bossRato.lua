@@ -1,4 +1,5 @@
 require "constantes"
+local som = require "sistemas.som"
 
 local bossRato = {}
 
@@ -7,6 +8,10 @@ bossRato.vida = 500
 bossRato.vidaMax = 500
 bossRato.w = 360
 bossRato.h = 360
+bossRato.derrotado = false
+bossRato.timerDerrota = 0
+bossRato.fimJogo = false
+
 
 local DESTINO_X = 1344 / 2 - 180
 local DESTINO_Y = 10
@@ -85,6 +90,9 @@ function bossRato.reset()
     pocas = {}
     timerPoca = 0
     gosmasFase3 = false
+    bossRato.derrotado = false
+    bossRato.timerDerrota = 0
+    bossRato.fimJogo = false
 end
 
 function bossRato.receberDano(qtd)
@@ -124,9 +132,24 @@ function bossRato.atualizar(dt, jogador, combate)
         return
     end
 
+    if bossRato.fimJogo then
+        return
+    end
+
+    if bossRato.derrotado then
+        bossRato.timerDerrota = bossRato.timerDerrota - dt
+        if bossRato.timerDerrota <= 0 then
+            bossRato.ativo = false
+            bossRato.fimJogo = true
+        end
+        return
+    end
+
     if bossRato.vida <= 0 then
-        bossRato.ativo = false
+        bossRato.derrotado = true
+        bossRato.timerDerrota = 2.0
         gosmas = {}
+        pocas = {}
         invencivel = false
         mostrarSprite = true
         return
@@ -190,6 +213,7 @@ function bossRato.atualizar(dt, jogador, combate)
         local jy = jogador.y + jogador.h / 2
         local qtd = gosmasFase2 and 5 or 3
         dispararGosmas(cx, cy, jx, jy, qtd)
+        som.tocar("ataqueRato")
     end
 
     -- Move gosmas e colisão com jogador
@@ -240,6 +264,7 @@ function bossRato.atualizar(dt, jogador, combate)
                 p.dx = (ddx / dist) * 400
                 p.dy = (ddy / dist) * 400
             end
+            som.tocar("ataqueRato")
         end
     end
 
@@ -300,7 +325,7 @@ function bossRato.verificarDanoEspada(jogador)
 end
 
 function bossRato.draw()
-    if not bossRato.ativo then return end
+    if not bossRato.ativo and not bossRato.derrotado then return end
 
     if mostrarSprite and frames[frameAtual] then
         local img = frames[frameAtual]
@@ -308,8 +333,27 @@ function bossRato.draw()
         if invencivel and shaderBranco then
             LG.setShader(shaderBranco)
         end
-        LG.setColor(1, 1, 1)
-        LG.draw(img, bossRato.x, bossRato.y, 0, escala, escala)
+
+        local drawX = bossRato.x
+        local drawY = bossRato.y
+
+        if bossRato.derrotado then
+            -- Efeito de tremor (shake)
+            drawX = drawX + love.math.random(-6, 6)
+            drawY = drawY + love.math.random(-6, 6)
+
+            -- Efeito de piscar vermelho/branco
+            local flashRed = math.floor(love.timer.getTime() * 15) % 2 == 0
+            if flashRed then
+                LG.setColor(1, 0.2, 0.2, 1)
+            else
+                LG.setColor(1, 1, 1, 1)
+            end
+        else
+            LG.setColor(1, 1, 1)
+        end
+
+        LG.draw(img, drawX, drawY, 0, escala, escala)
         LG.setShader()
     end
 
@@ -337,6 +381,29 @@ function bossRato.draw()
             LG.setColor(1, 1, 0.3, 0.4 * alpha)
             LG.ellipse("fill", p.x, p.y, p.r * 1.2, p.r * 0.6)
         end
+    end
+
+    -- Explosões durante derrota
+    if bossRato.derrotado then
+        local t = 2.0 - bossRato.timerDerrota
+        love.math.setRandomSeed(12345)
+        for i = 1, 6 do
+            local rx = bossRato.x + bossRato.w/2 + love.math.random(-120, 120)
+            local ry = bossRato.y + bossRato.h/2 + love.math.random(-120, 120)
+            local maxRadius = love.math.random(40, 80)
+            local delay = (i - 1) * 0.25
+            if t > delay then
+                local progress = (t - delay) / 0.6
+                if progress > 0 and progress < 1 then
+                    local r = progress * maxRadius
+                    LG.setColor(1, 0.6, 0.1, 0.7 * (1 - progress))
+                    LG.circle("fill", rx, ry, r)
+                    LG.setColor(1, 0.9, 0.3, 0.9 * (1 - progress))
+                    LG.circle("line", rx, ry, r)
+                end
+            end
+        end
+        love.math.setRandomSeed(os.time())
     end
 
     LG.setColor(1, 1, 1)

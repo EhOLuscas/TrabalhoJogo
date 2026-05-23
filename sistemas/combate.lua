@@ -1,6 +1,7 @@
 require "constantes"
 
 local jogador = require "entidades.jogador"
+local som = require "sistemas.som"
 
 local combate = {}
 
@@ -32,6 +33,7 @@ function combate.atualizar(dt, jogador, camera, projeteis)
                 local mx, my = love.mouse.getPosition()
                 local origemX, origemY = jogador.getMuzzlePosition()
                 projeteis.disparar(origemX, origemY, mx, my, camera.x, camera.y)
+                som.tocar("disparoCanhao")
             end
         end
     end
@@ -49,10 +51,15 @@ function combate.mousepressed(button, jogador, camera, projeteis)
         jogador.anim.timer = 0
         jogador.energia = jogador.energia - custoAtaque
 
-        if jogador.arma == "canhao" and projeteis then
-            local mx, my = love.mouse.getPosition()
-            local origemX, origemY = jogador.getMuzzlePosition()
-            projeteis.disparar(origemX, origemY, mx, my, camera.x, camera.y)
+        if jogador.arma == "canhao" then
+            if projeteis then
+                local mx, my = love.mouse.getPosition()
+                local origemX, origemY = jogador.getMuzzlePosition()
+                projeteis.disparar(origemX, origemY, mx, my, camera.x, camera.y)
+            end
+            som.tocar("disparoCanhao")
+        else
+            som.tocar("swordAttack")
         end
     end
 end

@@ -59,7 +59,6 @@ local function obterImagemBala()
             -- Frame 2: colunas 528-687 (w=160), linhas 544-655 (h=112)
             quadBala2 = love.graphics.newQuad(528, 544, 160, 112, 1024, 1024)
         else
-            print("Erro ao carregar sprites/tiro-canhao/Canhao_bala.png: " .. tostring(result))
             -- Fallback para Cannon_bala.png se necessário
             local success2, result2 = pcall(LG.newImage, "sprites/tiro-canhao/Cannon_bala.png")
             if success2 then
@@ -73,10 +72,42 @@ local function obterImagemBala()
     return imagemBala
 end
 
+local shaderAzul
+
+local function obterShaderAzul()
+    if not shaderAzul then
+        shaderAzul = LG.newShader([[
+            vec4 effect(vec4 color, Image tex, vec2 texCoords, vec2 screenCoords) {
+                vec4 pixel = Texel(tex, texCoords);
+                if (pixel.a < 0.01) discard;
+                
+                float r = pixel.r;
+                float g = pixel.g;
+                float b = pixel.b;
+                
+                // Converte tons de fogo para tons de plasma azul/ciano
+                vec3 corPlasma = vec3(r * 0.1, r * 0.6 + g * 0.4, max(r, b) * 1.0 + g * 0.2);
+                
+                // Preserva o brilho central branco
+                float luminosidade = (r + g + b) / 3.0;
+                pixel.rgb = mix(corPlasma, pixel.rgb, clamp((luminosidade - 0.75) * 4.0, 0.0, 1.0));
+                
+                return pixel * color;
+            }
+        ]])
+    end
+    return shaderAzul
+end
+
 function projeteis.draw()
     local img = obterImagemBala()
 
     if img then
+        local shader = obterShaderAzul()
+        if shader then
+            LG.setShader(shader)
+        end
+
         local ox = 160 / 2
         local oy = 112 / 2
         for _, p in ipairs(projeteis.lista) do
@@ -93,9 +124,13 @@ function projeteis.draw()
             -- Renderiza de forma perfeitamente centralizada e limpa usando o Quad
             LG.draw(img, quad, p.x, p.y, r, 0.1, 0.1, currentOx, currentOy)
         end
+
+        if shader then
+            LG.setShader()
+        end
     else
         -- Fallback caso a imagem não carregue de forma alguma
-        LG.setColor(1, 0.4, 0)
+        LG.setColor(0, 0.5, 1)
         for _, p in ipairs(projeteis.lista) do
             LG.circle("fill", p.x, p.y, 8)
         end
