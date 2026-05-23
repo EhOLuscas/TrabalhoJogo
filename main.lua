@@ -14,6 +14,10 @@ local musica = require "sistemas.musica"
 love.audio.setVolume(volumeJogo / 100)
 
 function love.load()
+    -- Reseta o save sempre que o jogo é iniciado
+    local save = require "sistemas.save"
+    save.deletar()
+
     musica.carregar()
     if estadoAtual.load then
         estadoAtual.load()

@@ -10,7 +10,7 @@ return {
   tilewidth = 32,
   tileheight = 32,
   nextlayerid = 5,
-  nextobjectid = 54,
+  nextobjectid = 65,
   properties = {},
   tilesets = {},
   layers = {
@@ -533,6 +533,118 @@ return {
           opacity = 1,
           visible = true,
           properties = {}
+        },
+        {
+          id = 57,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 508.667,
+          y = 90.6667,
+          width = 274.667,
+          height = 64,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 58,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 488.667,
+          y = 152.667,
+          width = 300,
+          height = 50,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 59,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 524.667,
+          y = 200,
+          width = 258.667,
+          height = 24.6667,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 60,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 542.667,
+          y = 225.333,
+          width = 192,
+          height = 41.3333,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 61,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 580.667,
+          y = 272,
+          width = 29.3333,
+          height = 24,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 62,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 291.333,
+          y = 464.667,
+          width = 139.333,
+          height = 103.333,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 63,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 378,
+          y = 452.667,
+          width = 46,
+          height = 18.6667,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 64,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 852,
+          y = 464,
+          width = 145.333,
+          height = 108.667,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
         }
       }
     },
@@ -564,8 +676,8 @@ return {
           visible = true,
           properties = {
             ["destino"] = "passagem",
-            ["spawnX"] = 114,
-            ["spawnY"] = 512
+            ["spawnX"] = 100,
+            ["spawnY"] = 560
           }
         }
       }

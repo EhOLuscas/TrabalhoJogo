@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="41" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="54">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="41" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="65">
  <editorsettings>
   <export target="mapa_polvo.lua" format="lua"/>
  </editorsettings>
@@ -42,13 +42,21 @@
   <object id="49" x="389.667" y="1056.33" width="52" height="27.3333"/>
   <object id="50" x="391" y="1035.67" width="37.3333" height="26"/>
   <object id="51" x="1085.33" y="202.667" width="93.3333" height="120"/>
+  <object id="57" x="508.667" y="90.6667" width="274.667" height="64"/>
+  <object id="58" x="488.667" y="152.667" width="300" height="50"/>
+  <object id="59" x="524.667" y="200" width="258.667" height="24.6667"/>
+  <object id="60" x="542.667" y="225.333" width="192" height="41.3333"/>
+  <object id="61" x="580.667" y="272" width="29.3333" height="24"/>
+  <object id="62" x="291.333" y="464.667" width="139.333" height="103.333"/>
+  <object id="63" x="378" y="452.667" width="46" height="18.6667"/>
+  <object id="64" x="852" y="464" width="145.333" height="108.667"/>
  </objectgroup>
  <objectgroup id="4" name="portais">
   <object id="16" x="944.317" y="251.552" width="56.946" height="87.43">
    <properties>
-    <property name="destino" value="fase2"/>
-    <property name="spawnX" type="int" value="280"/>
-    <property name="spawnY" type="int" value="200"/>
+    <property name="destino" value="passagem"/>
+    <property name="spawnX" type="int" value="100"/>
+    <property name="spawnY" type="int" value="560"/>
    </properties>
   </object>
  </objectgroup>

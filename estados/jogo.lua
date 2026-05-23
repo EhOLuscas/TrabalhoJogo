@@ -22,6 +22,7 @@ local ge = require "npc.guerreiro-energia"
 local ga = require "npc.guerreiro-aviso"
 local som = require "sistemas.som"
 local musica = require "sistemas.musica"
+local save = require "sistemas.save"
 
 local jogo = {}
 
@@ -35,16 +36,21 @@ local npcAvisoImg
 
 -- Declarada antes de ser usada em jogo.update e jogo.load
 local function trocarMapa(nomeMapa, spawnX, spawnY)
-    if nomeMapa == "fase2" then
-        jogador.canhaoDesbloqueado = true
-        jogador.arma = "canhao"
-    end
-
     if nomeMapa == "passagem" then
         jogador.vida = jogador.vidaMax
     end
 
     gerenciadorMapas.trocar(nomeMapa)
+    local mapaAtual = gerenciadorMapas.atual
+
+    -- Salva ao chegar no inicio ou passagem
+    if nomeMapa == "inicio" or nomeMapa == "passagem" then
+        save.salvar({
+            mapa = nomeMapa,
+            canhaoDesbloqueado = jogador.canhaoDesbloqueado,
+            arma = jogador.arma,
+        })
+    end
 
     local mapaAtual = gerenciadorMapas.atual
 
@@ -97,6 +103,16 @@ function jogo.load()
     jogador.vida = 100
     jogador.energia = 100
 
+    -- Carrega save se existir
+    local dadosSave = save.carregar()
+    if dadosSave then
+        jogador.canhaoDesbloqueado = dadosSave.canhaoDesbloqueado or false
+        jogador.arma = dadosSave.arma or "espada"
+        if dadosSave.mapa and dadosSave.mapa ~= gerenciadorMapas.atual.nome then
+            gerenciadorMapas.trocar(dadosSave.mapa)
+        end
+    end
+
     hud.carregar()
 
     local mapaAtual = gerenciadorMapas.atual
@@ -141,6 +157,16 @@ function jogo.load()
     npcCanhaoImg = LG.newImage(gc.retrato)
     npcEnergiaImg = LG.newImage(ge.retrato)
     npcAvisoImg = LG.newImage(ga.retrato)
+
+    -- Salva o mapa inicial se ainda não houver save
+    local mapaAtual = gerenciadorMapas.atual
+    if not save.existe() then
+        save.salvar({
+            mapa = mapaAtual.nome,
+            canhaoDesbloqueado = jogador.canhaoDesbloqueado or false,
+            arma = jogador.arma or "espada",
+        })
+    end
 end
 
 function jogo.update(dt)
@@ -186,6 +212,7 @@ function jogo.update(dt)
 
         if bossRato.fimJogo then
             bossRato.reset()
+            save.deletar()
             local cutscene = require "estados.cutscene"
             cutscene.videoPath = "sprites/cutscine-final.ogv"
             cutscene.proximoEstado = require "estados.menu"
@@ -203,8 +230,8 @@ function jogo.update(dt)
     -- Gameover
     if jogador.vida <= 0 then
         musica.parar()
+        love.mouse.setVisible(true)
         estadoAtual = require "estados.gameover"
-
         return
     end
 
@@ -224,7 +251,12 @@ function jogo.update(dt)
     camera.atualizar(jogador, gerenciadorMapas.atual.imagem)
 
     -- Sempre atualiza portais, permitindo transição da fase 1 mesmo sem derrotar o boss
-    portais.update(jogador, trocarMapa, dt)
+    -- portais.update(jogador, trocarMapa, dt)
+
+    -- Atualiza o portal apenas quando o boss é morto
+    if mapaNome ~= "fase1" or bossPolvo.morto then
+        portais.update(jogador, trocarMapa, dt)
+    end
 
     -- Atualiza sons de boss
     som.atualizarBossSons(
@@ -238,20 +270,27 @@ function jogo.draw()
     camera.aplicar()
     render.desenharMapa(gerenciadorMapas.atual.imagem)
     local mapaNome = gerenciadorMapas.atual.nome
+
     -- Sempre desenha portais
-    portais.draw()
+    -- portais.draw()
+
+    -- Desenha o portal apenas quando o boss estiver morto
+    if mapaNome ~= "fase1" or bossPolvo.morto then
+        portais.draw()
+    end
+
     -- Desenha jogador e guardiões com ordenação Y no mapa inicial
     if gerenciadorMapas.atual.nome == "inicio" and npcGuardiaoImg and npcEspadaImg then
         -- VALORES DE AJUSTE DO GUARDIAO TELETRANSPORTE:
-        local guardiaoEscala = 1.35  -- <-- Altere o tamanho/escala aqui (ex: 1.0, 1.2, 1.5)
-        local guardiaoX = 920        -- <-- Posição X
-        local guardiaoY = 610        -- <-- Posição Y
+        local guardiaoEscala = 1.35 -- <-- Altere o tamanho/escala aqui (ex: 1.0, 1.2, 1.5)
+        local guardiaoX = 920       -- <-- Posição X
+        local guardiaoY = 610       -- <-- Posição Y
         local guardianBottomY = guardiaoY + (128 * guardiaoEscala) * 0.85
 
         -- VALORES DE AJUSTE DO GUARDIAO ESPADA:
-        local guardiaoEspadaEscala = 1.35  -- <-- Altere o tamanho/escala aqui (ex: 1.0, 1.2, 1.5)
-        local guardiaoEspadaX = 730        -- <-- Posição X (diminuir move para esquerda, aumentar move para direita)
-        local guardiaoEspadaY = 130        -- <-- Posição Y (diminuir move para cima, aumentar move para baixo)
+        local guardiaoEspadaEscala = 1.35 -- <-- Altere o tamanho/escala aqui (ex: 1.0, 1.2, 1.5)
+        local guardiaoEspadaX = 730       -- <-- Posição X (diminuir move para esquerda, aumentar move para direita)
+        local guardiaoEspadaY = 130       -- <-- Posição Y (diminuir move para cima, aumentar move para baixo)
         local guardianEspadaBottomY = guardiaoEspadaY + (128 * guardiaoEspadaEscala) * 0.85
 
         -- VALORES DE AJUSTE DO GUARDIAO ENERGIA:
@@ -284,7 +323,8 @@ function jogo.draw()
                 y = guardianEnergiaBottomY,
                 draw = function()
                     LG.setColor(1, 1, 1)
-                    LG.draw(npcEnergiaImg, guardiaoEnergiaX, guardiaoEnergiaY, 0, guardiaoEnergiaEscala, guardiaoEnergiaEscala)
+                    LG.draw(npcEnergiaImg, guardiaoEnergiaX, guardiaoEnergiaY, 0, guardiaoEnergiaEscala,
+                        guardiaoEnergiaEscala)
                 end
             }
         }
@@ -387,6 +427,7 @@ function jogo.keypressed(key)
     end
 
     if key == "escape" then
+        love.mouse.setVisible(true)
         estadoAtual = require "estados.pausa"
     end
 

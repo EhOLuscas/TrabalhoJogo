@@ -3,6 +3,7 @@ local gerenciadorMapas = require "sistemas.gerenciadorMapas"
 local gc = require "npc.guerreiro-canhao"
 local ge = require "npc.guerreiro-energia"
 local ga = require "npc.guerreiro-aviso"
+local save = require "sistemas.save"
 
 local dialogo = {}
 
@@ -375,6 +376,18 @@ function dialogo.atualizar(dt, jogador)
 end
 
 function dialogo.fechar()
+    -- Desbloqueia o canhão ao terminar o diálogo com Korvath
+    if dialogo.interagirCom == "canhao" then
+        local jogador = require "entidades.jogador"
+        jogador.canhaoDesbloqueado = true
+        -- Persiste o desbloqueio imediatamente no save
+        local dadosSave = save.carregar() or {}
+        save.salvar({
+            mapa = dadosSave.mapa or "passagem",
+            canhaoDesbloqueado = true,
+            arma = jogador.arma or "espada",
+        })
+    end
     dialogo.ativo = false
     dialogo.pararAudios()
 end

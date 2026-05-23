@@ -6,6 +6,8 @@ local imagemFundo
 local botoes = {}
 
 function menu.load()
+    love.mouse.setVisible(true)
+    love.mouse.setCursor(love.mouse.getSystemCursor("arrow"))
     imagemFundo = LG.newImage("sprites/imagem-menu.png")
 
     local musica = require "sistemas.musica"
