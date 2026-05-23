@@ -210,14 +210,14 @@ function jogo.update(dt)
 
     -- Atualiza música de fundo (BGM)
     if mapaNome == "inicio" or mapaNome == "fase1" then
-        musica.tocar("colten")
+        musica.tocar("trilha1")
     elseif mapaNome == "passagem" then
-        musica.tocar("michael")
+        musica.tocar("trilha2")
     elseif mapaNome == "fase2" then
         if bossRato.derrotado then
             musica.parar()
         else
-            musica.tocar("michael")
+            musica.tocar("trilha2")
         end
     end
 
@@ -229,7 +229,7 @@ function jogo.update(dt)
     -- Atualiza sons de boss
     som.atualizarBossSons(
         mapaNome,
-        bossPolvo.ativo and not bossPolvo.morto,
+        bossPolvo.ativo and not bossPolvo.morto and not bossPolvo.derrotado,
         bossRato.ativo and not bossRato.derrotado
     )
 end

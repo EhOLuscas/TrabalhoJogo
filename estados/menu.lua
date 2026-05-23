@@ -9,7 +9,7 @@ function menu.load()
     imagemFundo = LG.newImage("sprites/imagem-menu.png")
 
     local musica = require "sistemas.musica"
-    musica.tocar("colten")
+    musica.tocar("trilha1")
 
     botoes = {
         {
@@ -46,6 +46,7 @@ function menu.load()
 end
 
 function menu.update(dt)
+    love.mouse.setVisible(false)
     local mx, my = love.mouse.getPosition()
     local sobreAlgum = false
     for _, botao in ipairs(botoes) do
@@ -68,6 +69,33 @@ function menu.draw()
     -- Fundo
     LG.setColor(1, 1, 1)
     LG.draw(imagemFundo, 0, 0)
+
+    -- Desenha cursor personalizado (cruz)
+    local mx, my = love.mouse.getPosition()
+    local sobreAlgum = false
+    for _, botao in ipairs(botoes) do
+        if mx >= botao.x and mx <= botao.x + botao.w and
+           my >= botao.y and my <= botao.y + botao.h then
+            sobreAlgum = true
+            break
+        end
+    end
+
+    if sobreAlgum then
+        LG.setColor(0.90, 0.75, 0.40, 0.95) -- Dourado/bronze ao passar sobre botões
+    else
+        LG.setColor(0, 0.9, 0.9, 0.9) -- ciano padrão
+    end
+    LG.setLineWidth(2)
+    LG.line(mx - 10, my, mx - 3, my)
+    LG.line(mx + 3, my, mx + 10, my)
+    LG.line(mx, my - 10, mx, my - 3)
+    LG.line(mx, my + 3, mx, my + 10)
+    LG.circle("line", mx, my, 3)
+    if sobreAlgum then
+        LG.circle("fill", mx, my, 2)
+    end
+    LG.setColor(1, 1, 1, 1)
 end
 
 function menu.mousepressed(x, y, button)

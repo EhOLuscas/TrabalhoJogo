@@ -5,23 +5,23 @@ local trackAtual = nil
 local nomeTrackAtual = nil
 
 function musica.carregar()
-    local pathColten = "sprites/musica fundo/Colten Tyler Williams - Gathering - Creative Cut - Distorted.ogv"
-    local pathMichael = "sprites/musica fundo/Michael Oates - Outrunner - Creative Cut - Minimal.ogv"
+    local pathTrilha1 = "sprites/musica fundo/Dark Horror DmitryTaras.ogv"
+    local pathTrilha2 = "sprites/musica fundo/Horror Train By SUNRIZISH.ogv"
 
-    local ok1, res1 = pcall(love.audio.newSource, pathColten, "stream")
+    local ok1, res1 = pcall(love.audio.newSource, pathTrilha1, "stream")
     if ok1 then
-        tracks.colten = res1
-        tracks.colten:setLooping(true)
+        tracks.trilha1 = res1
+        tracks.trilha1:setLooping(true)
     else
-        print("Erro ao carregar musica Colten: ", res1)
+        print("Erro ao carregar musica Trilha 1 (Dark Horror): ", res1)
     end
 
-    local ok2, res2 = pcall(love.audio.newSource, pathMichael, "stream")
+    local ok2, res2 = pcall(love.audio.newSource, pathTrilha2, "stream")
     if ok2 then
-        tracks.michael = res2
-        tracks.michael:setLooping(true)
+        tracks.trilha2 = res2
+        tracks.trilha2:setLooping(true)
     else
-        print("Erro ao carregar musica Michael: ", res2)
+        print("Erro ao carregar musica Trilha 2 (Horror Train): ", res2)
     end
 end
 
@@ -42,6 +42,12 @@ function musica.tocar(nome)
         local vol = (volumeMusica or 100) / 100
         trackAtual:setVolume(vol)
         trackAtual:play()
+    end
+end
+
+function musica.seek(segundos)
+    if trackAtual then
+        pcall(function() trackAtual:seek(segundos, "seconds") end)
     end
 end
 
