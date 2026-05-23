@@ -184,7 +184,7 @@ function jogo.update(dt)
 
     camera.atualizar(jogador, gerenciadorMapas.atual.imagem)
 
-    if mapaNome ~= "fase1" or not bossPolvo.ativo and bossPolvo.vida <= 0 then
+    if mapaNome ~= "fase1" or bossPolvo.morto then
         portais.update(jogador, trocarMapa, dt)
     end
 end
@@ -193,7 +193,7 @@ function jogo.draw()
     camera.aplicar()
     render.desenharMapa(gerenciadorMapas.atual.imagem)
     local mapaNome = gerenciadorMapas.atual.nome
-    if mapaNome ~= "fase1" or not bossPolvo.ativo and bossPolvo.vida <= 0 then
+    if mapaNome ~= "fase1" or bossPolvo.morto then
         portais.draw()
     end
     -- Desenha jogador e guardiões com ordenação Y no mapa inicial
@@ -257,9 +257,9 @@ function jogo.draw()
     end
     -- HUD dos bosses
     if gerenciadorMapas.atual.nome == "fase1" then
-        hudBoss.draw(bossPolvo, "polvo")
+        hudBoss.draw(bossPolvo, "Nyx'Thalor")
     elseif gerenciadorMapas.atual.nome == "fase2" then
-        hudBoss.draw(bossRato, "rato")
+        hudBoss.draw(bossRato, "Vorl'Guth")
     end
     dialogo.drawScreen()
 end

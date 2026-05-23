@@ -5,10 +5,11 @@ local bossPolvo = {}
 bossPolvo.ativo = false
 bossPolvo.vida = 500
 bossPolvo.vidaMax = 500
+bossPolvo.morto = false
 bossPolvo.x = 0
 bossPolvo.y = 0
-bossPolvo.w = 300
-bossPolvo.h = 300
+bossPolvo.w = 380
+bossPolvo.h = 380
 
 -- Animação
 local frames = {}
@@ -79,6 +80,7 @@ function bossPolvo.reset()
     timerCooldownEspada = 0
     laser.fase = FASE_PAUSA
     laser.timer = laser.duracaoPausa
+    bossPolvo.morto = false
 end
 
 function bossPolvo.receberDano(qtd)
@@ -106,6 +108,7 @@ function bossPolvo.atualizar(dt, jogador, combate)
 
     if bossPolvo.vida <= 0 then
         bossPolvo.ativo = false
+        bossPolvo.morto = true
         invencivel = false
         mostrarSprite = false
         return

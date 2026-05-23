@@ -5,11 +5,11 @@ local bossRato = {}
 bossRato.ativo = false
 bossRato.vida = 500
 bossRato.vidaMax = 500
-bossRato.w = 280
-bossRato.h = 280
+bossRato.w = 360
+bossRato.h = 360
 
-local DESTINO_X = 1344 / 2 - 140
-local DESTINO_Y = 40
+local DESTINO_X = 1344 / 2 - 180
+local DESTINO_Y = 10
 local LARGURA_MAPA2 = 1344
 
 bossRato.x = -200

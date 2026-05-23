@@ -20,7 +20,7 @@ function hudBoss.draw(boss, nome)
     LG.rectangle("fill", x, y, largura, altura, 3)
 
     -- Barra de vida (vermelha para polvo, verde para rato)
-    if nome == "polvo" then
+    if nome == "Nyx'Thalor" then
         LG.setColor(0.9, 0.1, 0.1)
     else
         local fase2 = boss.vida <= boss.vidaMax * 0.75
@@ -43,9 +43,6 @@ function hudBoss.draw(boss, nome)
     -- Nome do boss
     LG.setColor(1, 1, 1)
     LG.printf(nome:upper(), x, y - 20, largura, "center")
-
-    -- Vida
-    LG.printf(math.ceil(boss.vida) .. " / " .. boss.vidaMax, x, y + 2, largura, "center")
 
     LG.setColor(1, 1, 1)
     LG.setLineWidth(1)
