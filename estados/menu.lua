@@ -227,16 +227,16 @@ function menu.load()
     carregarRecursos()
 
     local musica = require "sistemas.musica"
-    musica.tocar("trilha1")
+    musica.tocar("musica1")
 
     -- Coordenadas originais dos botões principais
     botoes = {
         {
             label = "INICIAR JOGO",
-            rx = 105,
-            ry = 507,
-            rw = 472,
-            rh = 130,
+            rx = 85,
+            ry = 485,
+            rw = 460,
+            rh = 110,
             x = 0, y = 0, w = 0, h = 0,
             hover = false,
             acao = function()
@@ -250,10 +250,10 @@ function menu.load()
         },
         {
             label = "CONFIGURAÇÕES",
-            rx = 105,
-            ry = 690,
-            rw = 472,
-            rh = 130,
+            rx = 85,
+            ry = 670,
+            rw = 460,
+            rh = 110,
             x = 0, y = 0, w = 0, h = 0,
             hover = false,
             acao = function()

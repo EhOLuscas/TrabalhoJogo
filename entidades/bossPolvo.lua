@@ -109,8 +109,6 @@ function bossPolvo.atualizar(dt, jogador, combate)
             bossPolvo.ativo = true
             laser.fase = FASE_PAUSA
             laser.timer = 1.5
-            local musica = require "sistemas.musica"
-            musica.seek(40)
         end
         return
     end

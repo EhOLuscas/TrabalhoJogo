@@ -47,7 +47,7 @@ estadoAtual = require "estados.menu"
 -- Configurações globais de opções
 brilhoGlobal = 100
 volumeJogo = 100
-volumeMusica = 100
+volumeMusica = 20
 
 local musica = require "sistemas.musica"
 local gameCanvas
