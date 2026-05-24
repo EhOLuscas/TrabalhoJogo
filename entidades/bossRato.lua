@@ -128,8 +128,6 @@ function bossRato.atualizar(dt, jogador, combate)
             bossRato.x = -200
             bossRato.y = DESTINO_Y
             chegou = false
-            local musica = require "sistemas.musica"
-            musica.seek(18)
         end
         return
     end

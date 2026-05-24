@@ -349,7 +349,9 @@ function configuracoes.draw()
     -- 1. Draw Menu Background Image
     love.graphics.setColor(1, 1, 1)
     if imagemFundo then
-        love.graphics.draw(imagemFundo, 0, 0)
+        local scaleX = screenW / 1679
+        local scaleY = screenH / 937
+        love.graphics.draw(imagemFundo, 0, 0, 0, scaleX, scaleY)
     end
 
     -- 2. Dark overlay on screen (dimmed view)

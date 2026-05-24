@@ -16,6 +16,7 @@ local Korvath = {
         "pt8.ogv",
         "pt9.ogv",
         "pt10.ogv",
+        "canhao.ogv",
         "pt11.ogv"
     },
     falas = {
@@ -29,6 +30,7 @@ local Korvath = {
         "“Quanto mais você usar seu poder… mais o Abismo irá notar sua existência.”",
         "“Clique com o botão esquerdo do mouse para disparar o plasma.”",
         "“Mas cuidado com o superaquecimento…”",
+        "“Aqui está seu canhão, aperte Q para alternar entre suas armas”",
         "“Agora vá.”"
     }
 }

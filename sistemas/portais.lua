@@ -14,6 +14,16 @@ local frameAtual = 1
 local timer = 0
 local fps = 12
 
+local function isPortalAtivo(portal)
+    local gerenciadorMapas = require "sistemas.gerenciadorMapas"
+    local mapaNome = gerenciadorMapas.atual and gerenciadorMapas.atual.nome
+    if mapaNome == "fase1" and portal.destino == "passagem" then
+        local bossPolvo = require "entidades.bossPolvo"
+        return bossPolvo.morto
+    end
+    return true
+end
+
 function portais.carregarSprite()
     sheet = LG.newImage("sprites/portal-spritesheet.png")
     local sw = sheet:getWidth()
@@ -39,18 +49,20 @@ function portais.update(jogador, trocarMapa, dt)
         end
     end
 
-    -- Colisão
+    -- Colisão (apenas se o portal estiver ativo)
     for _, portal in ipairs(portais.lista) do
-        local colidiu =
-            jogador.x < portal.x + portal.w and
-            jogador.x + jogador.w > portal.x and
-            jogador.y < portal.y + portal.h and
-            jogador.y + jogador.h > portal.y
+        if isPortalAtivo(portal) then
+            local colidiu =
+                jogador.x < portal.x + portal.w and
+                jogador.x + jogador.w > portal.x and
+                jogador.y < portal.y + portal.h and
+                jogador.y + jogador.h > portal.y
 
-        if colidiu then
-            som.tocar("passarFase")
-            trocarMapa(portal.destino, portal.spawnX, portal.spawnY)
-            break
+            if colidiu then
+                som.tocar("passarFase")
+                trocarMapa(portal.destino, portal.spawnX, portal.spawnY)
+                break
+            end
         end
     end
 end
@@ -84,7 +96,7 @@ function portais.draw()
     LG.setBlendMode("add")
 
     for _, portal in ipairs(portais.lista) do
-        if not portal.invisivel then
+        if not portal.invisivel and isPortalAtivo(portal) then
             -- Efeito pulsar de opacidade (respiração mágica)
             local pulse = 0.82 + 0.18 * math.sin(love.timer.getTime() * 4.5)
             LG.setColor(1, 1, 1, pulse)
