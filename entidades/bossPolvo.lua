@@ -8,6 +8,8 @@ bossPolvo.vida = 500
 bossPolvo.vidaMax = 500
 bossPolvo.morto = false
 bossPolvo.corrompido = false
+bossPolvo.derrotado = false
+bossPolvo.timerDerrota = 0
 bossPolvo.x = 0
 bossPolvo.y = 0
 bossPolvo.w = 380
@@ -84,6 +86,8 @@ function bossPolvo.reset()
     laser.timer = laser.duracaoPausa
     bossPolvo.morto = false
     bossPolvo.corrompido = false
+    bossPolvo.derrotado = false
+    bossPolvo.timerDerrota = 0
 end
 
 function bossPolvo.receberDano(qtd)
@@ -100,20 +104,35 @@ local function centroJogador(jogador)
 end
 
 function bossPolvo.atualizar(dt, jogador, combate)
-    if not bossPolvo.ativo then
+    if not bossPolvo.ativo and not bossPolvo.derrotado then
         if jogador.x > LARGURA_MAPA / 2 - 200 then
             bossPolvo.ativo = true
             laser.fase = FASE_PAUSA
             laser.timer = 1.5
+            local musica = require "sistemas.musica"
+            musica.seek(40)
+        end
+        return
+    end
+
+    if bossPolvo.derrotado then
+        bossPolvo.timerDerrota = bossPolvo.timerDerrota - dt
+        if bossPolvo.timerDerrota <= 0 then
+            bossPolvo.ativo = false
+            bossPolvo.morto = true
+            bossPolvo.derrotado = false
         end
         return
     end
 
     if bossPolvo.vida <= 0 then
-        bossPolvo.ativo = false
-        bossPolvo.morto = true
+        bossPolvo.derrotado = true
+        bossPolvo.timerDerrota = 2.0
+        laser.fase = FASE_PAUSA
+        laser.timer = 0
+        som.parar("laser")
         invencivel = false
-        mostrarSprite = false
+        mostrarSprite = true
         return
     end
 
@@ -224,7 +243,7 @@ function bossPolvo.verificarDanoEspada(jogador)
 end
 
 function bossPolvo.draw()
-    if not bossPolvo.ativo then return end
+    if not bossPolvo.ativo and not bossPolvo.derrotado then return end
 
     local oldFont = LG.getFont()
 
@@ -232,12 +251,13 @@ function bossPolvo.draw()
         local img = frames[frameAtual]
         local escala = bossPolvo.w / img:getWidth()
         
-        -- Jitter position if corrupted
+        -- Jitter position if corrupted or defeated
         local bx = bossPolvo.x
         local by = bossPolvo.y
-        if bossPolvo.corrompido then
-            bx = bx + love.math.random(-5, 5)
-            by = by + love.math.random(-5, 5)
+        if bossPolvo.corrompido or bossPolvo.derrotado then
+            local intensity = bossPolvo.derrotado and 7 or 5
+            bx = bx + love.math.random(-intensity, intensity)
+            by = by + love.math.random(-intensity, intensity)
         end
 
         if invencivel and shaderBranco then
@@ -245,6 +265,15 @@ function bossPolvo.draw()
             LG.setColor(1, 1, 1)
             LG.draw(img, bx, by, 0, escala, escala)
             LG.setShader()
+        elseif bossPolvo.derrotado then
+            -- Piscar vermelho e branco durante a derrota
+            local flashRed = math.floor(love.timer.getTime() * 15) % 2 == 0
+            if flashRed then
+                LG.setColor(1, 0.2, 0.2, 1)
+            else
+                LG.setColor(1, 1, 1, 1)
+            end
+            LG.draw(img, bx, by, 0, escala, escala)
         elseif bossPolvo.corrompido then
             -- Chromatic aberration glitch effect
             -- Red channel shift left
@@ -267,8 +296,8 @@ function bossPolvo.draw()
         end
     end
 
-    -- Draw random digital glitch bars over the boss
-    if bossPolvo.ativo and bossPolvo.corrompido and love.math.random() < 0.35 then
+    -- Draw random digital glitch bars over the boss (only if not defeated)
+    if bossPolvo.ativo and bossPolvo.corrompido and not bossPolvo.derrotado and love.math.random() < 0.35 then
         for i = 1, love.math.random(3, 7) do
             local gx = bossPolvo.x + love.math.random(-30, bossPolvo.w - 30)
             local gy = bossPolvo.y + love.math.random(0, bossPolvo.h - 10)
@@ -287,101 +316,127 @@ function bossPolvo.draw()
         end
     end
 
-    local ox, oy = laser.origemX, laser.origemY
+    -- Draw laser (only if not defeated)
+    if not bossPolvo.derrotado then
+        local ox, oy = laser.origemX, laser.origemY
 
-    if laser.fase == FASE_ALERTA then
-        local dx = laser.alvoX - ox
-        local dy = laser.alvoY - oy
-        local dist = math.sqrt(dx*dx + dy*dy)
-        if dist > 0 then
-            local ex = ox + (dx/dist) * 1200
-            local ey = oy + (dy/dist) * 1200
-            local alpha = 0.4 + 0.4 * math.abs(math.sin(love.timer.getTime() * 8))
-            
-            if bossPolvo.corrompido then
-                -- Jittery alert line (multiple lines)
-                local offsetJitter = love.math.random(-4, 4)
+        if laser.fase == FASE_ALERTA then
+            local dx = laser.alvoX - ox
+            local dy = laser.alvoY - oy
+            local dist = math.sqrt(dx*dx + dy*dy)
+            if dist > 0 then
+                local ex = ox + (dx/dist) * 1200
+                local ey = oy + (dy/dist) * 1200
+                local alpha = 0.4 + 0.4 * math.abs(math.sin(love.timer.getTime() * 8))
                 
-                -- Magenta/red jittery line 1
-                LG.setColor(0.9, 0.0, 0.9, alpha)
-                LG.setLineWidth(4)
-                LG.line(ox, oy, ex + offsetJitter, ey - offsetJitter)
-                
-                -- Cyan/red jittery line 2
-                LG.setColor(0.0, 0.9, 0.9, alpha)
-                LG.setLineWidth(2)
-                LG.line(ox, oy, ex - offsetJitter, ey + offsetJitter)
-                
-                -- Glitch target circle
-                LG.setColor(0.9, 0.2, 0.9, alpha)
-                LG.circle("line", laser.alvoX + offsetJitter, laser.alvoY - offsetJitter, 15)
-                LG.circle("fill", laser.alvoX, laser.alvoY, 6)
-            else
-                LG.setColor(1, 0, 0, alpha)
-                LG.setLineWidth(3)
-                LG.line(ox, oy, ex, ey)
-                LG.setColor(1, 0.2, 0.2, alpha)
-                LG.circle("fill", laser.alvoX, laser.alvoY, 12)
-            end
-            LG.setLineWidth(1)
-        end
-    elseif laser.fase == FASE_LASER then
-        local dx = laser.alvoX - ox
-        local dy = laser.alvoY - oy
-        local dist = math.sqrt(dx*dx + dy*dy)
-        if dist > 0 then
-            local ex = ox + (dx/dist) * 1200
-            local ey = oy + (dy/dist) * 1200
-            
-            if bossPolvo.corrompido then
-                -- Corrupted Laser Beam (Thicker, neon magenta/cyan glitch)
-                local t = love.timer.getTime()
-                local isCyan = math.floor(t * 24) % 2 == 0
-                
-                -- Outer laser beam (flashes cyan/magenta)
-                if isCyan then
-                    LG.setColor(0, 0.95, 0.95, 0.75)
+                if bossPolvo.corrompido then
+                    -- Jittery alert line (multiple lines)
+                    local offsetJitter = love.math.random(-4, 4)
+                    
+                    -- Magenta/red jittery line 1
+                    LG.setColor(0.9, 0.0, 0.9, alpha)
+                    LG.setLineWidth(4)
+                    LG.line(ox, oy, ex + offsetJitter, ey - offsetJitter)
+                    
+                    -- Cyan/red jittery line 2
+                    LG.setColor(0.0, 0.9, 0.9, alpha)
+                    LG.setLineWidth(2)
+                    LG.line(ox, oy, ex - offsetJitter, ey + offsetJitter)
+                    
+                    -- Glitch target circle
+                    LG.setColor(0.9, 0.2, 0.9, alpha)
+                    LG.circle("line", laser.alvoX + offsetJitter, laser.alvoY - offsetJitter, 15)
+                    LG.circle("fill", laser.alvoX, laser.alvoY, 6)
                 else
-                    LG.setColor(0.95, 0, 0.95, 0.75)
+                    LG.setColor(1, 0, 0, alpha)
+                    LG.setLineWidth(3)
+                    LG.line(ox, oy, ex, ey)
+                    LG.setColor(1, 0.2, 0.2, alpha)
+                    LG.circle("fill", laser.alvoX, laser.alvoY, 12)
                 end
-                LG.setLineWidth(32)
-                LG.line(ox, oy, ex, ey)
-                
-                -- Middle beam (neon pink)
-                LG.setColor(1, 0.25, 0.65, 0.85)
-                LG.setLineWidth(16)
-                LG.line(ox, oy, ex, ey)
-                
-                -- Inner core (white)
-                LG.setColor(1, 1, 1, 1.0)
-                LG.setLineWidth(6)
-                LG.line(ox, oy, ex, ey)
-                
-                -- Draw perpendicular digital static sparks along the laser path
-                LG.setColor(0.1, 0.95, 0.95, 0.85)
-                LG.setLineWidth(2)
-                for j = 1, 14 do
-                    local t_spark = love.math.random()
-                    local sx = ox + (ex - ox) * t_spark
-                    local sy = oy + (ey - oy) * t_spark
-                    local pSize = love.math.random(15, 45)
-                    local px = -dy / dist * pSize
-                    local py = dx / dist * pSize
-                    LG.line(sx - px/2, sy - py/2, sx + px/2, sy + py/2)
-                end
-            else
-                LG.setColor(1, 0, 0, 0.3)
-                LG.setLineWidth(20)
-                LG.line(ox, oy, ex, ey)
-                LG.setColor(1, 0.3, 0.3, 0.7)
-                LG.setLineWidth(8)
-                LG.line(ox, oy, ex, ey)
-                LG.setColor(1, 1, 1, 1)
-                LG.setLineWidth(3)
-                LG.line(ox, oy, ex, ey)
+                LG.setLineWidth(1)
             end
-            LG.setLineWidth(1)
+        elseif laser.fase == FASE_LASER then
+            local dx = laser.alvoX - ox
+            local dy = laser.alvoY - oy
+            local dist = math.sqrt(dx*dx + dy*dy)
+            if dist > 0 then
+                local ex = ox + (dx/dist) * 1200
+                local ey = oy + (dy/dist) * 1200
+                
+                if bossPolvo.corrompido then
+                    -- Corrupted Laser Beam (Thicker, neon magenta/cyan glitch)
+                    local t = love.timer.getTime()
+                    local isCyan = math.floor(t * 24) % 2 == 0
+                    
+                    -- Outer laser beam (flashes cyan/magenta)
+                    if isCyan then
+                        LG.setColor(0, 0.95, 0.95, 0.75)
+                    else
+                        LG.setColor(0.95, 0, 0.95, 0.75)
+                    end
+                    LG.setLineWidth(32)
+                    LG.line(ox, oy, ex, ey)
+                    
+                    -- Middle beam (neon pink)
+                    LG.setColor(1, 0.25, 0.65, 0.85)
+                    LG.setLineWidth(16)
+                    LG.line(ox, oy, ex, ey)
+                    
+                    -- Inner core (white)
+                    LG.setColor(1, 1, 1, 1.0)
+                    LG.setLineWidth(6)
+                    LG.line(ox, oy, ex, ey)
+                    
+                    -- Draw perpendicular digital static sparks along the laser path
+                    LG.setColor(0.1, 0.95, 0.95, 0.85)
+                    LG.setLineWidth(2)
+                    for j = 1, 14 do
+                        local t_spark = love.math.random()
+                        local sx = ox + (ex - ox) * t_spark
+                        local sy = oy + (ey - oy) * t_spark
+                        local pSize = love.math.random(15, 45)
+                        local px = -dy / dist * pSize
+                        local py = dx / dist * pSize
+                        LG.line(sx - px/2, sy - py/2, sx + px/2, sy + py/2)
+                    end
+                else
+                    LG.setColor(1, 0, 0, 0.3)
+                    LG.setLineWidth(20)
+                    LG.line(ox, oy, ex, ey)
+                    LG.setColor(1, 0.3, 0.3, 0.7)
+                    LG.setLineWidth(8)
+                    LG.line(ox, oy, ex, ey)
+                    LG.setColor(1, 1, 1, 1)
+                    LG.setLineWidth(3)
+                    LG.line(ox, oy, ex, ey)
+                end
+                LG.setLineWidth(1)
+            end
         end
+    end
+
+    -- Explosões durante derrota
+    if bossPolvo.derrotado then
+        local t = 2.0 - bossPolvo.timerDerrota
+        love.math.setRandomSeed(12345)
+        for i = 1, 8 do
+            local rx = bossPolvo.x + bossPolvo.w/2 + love.math.random(-140, 140)
+            local ry = bossPolvo.y + bossPolvo.h/2 + love.math.random(-140, 140)
+            local maxRadius = love.math.random(50, 90)
+            local delay = (i - 1) * 0.2
+            if t > delay then
+                local progress = (t - delay) / 0.5
+                if progress > 0 and progress < 1 then
+                    local r = progress * maxRadius
+                    LG.setColor(1, 0.5, 0.1, 0.8 * (1 - progress))
+                    LG.circle("fill", rx, ry, r)
+                    LG.setColor(1, 0.8, 0.2, 0.9 * (1 - progress))
+                    LG.circle("line", rx, ry, r)
+                end
+            end
+        end
+        love.math.setRandomSeed(os.time())
     end
 
     LG.setColor(1, 1, 1)
