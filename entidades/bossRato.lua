@@ -6,15 +6,15 @@ local bossRato = {}
 bossRato.ativo = false
 bossRato.vida = 500
 bossRato.vidaMax = 500
-bossRato.w = 360
-bossRato.h = 360
+bossRato.w = 200
+bossRato.h = 125
 bossRato.derrotado = false
 bossRato.timerDerrota = 0
 bossRato.fimJogo = false
 
 
-local DESTINO_X = 1344 / 2 - 180
-local DESTINO_Y = 10
+local DESTINO_X = 1344 / 2 - 100
+local DESTINO_Y = 100
 local LARGURA_MAPA2 = 1344
 
 bossRato.x = -200
@@ -286,7 +286,7 @@ function bossRato.atualizar(dt, jogador, combate)
             -- Dano ao jogador
             local jx = jogador.x + jogador.w / 2
             local jy = jogador.y + jogador.h / 2
-            if math.sqrt((p.x-jx)^2 + (p.y-jy)^2) < p.r * 2 + 12 then
+            if math.sqrt((p.x - jx) ^ 2 + (p.y - jy) ^ 2) < p.r * 2 + 12 then
                 combate.receberDano(jogador, 8)
             end
             if p.timer <= 0 then
@@ -329,20 +329,21 @@ function bossRato.draw()
 
     if mostrarSprite and frames[frameAtual] then
         local img = frames[frameAtual]
-        local escala = bossRato.w / img:getWidth()
+        local tamanhoVisual = 360
+        local escala = tamanhoVisual / img:getWidth()
+        local offsetX = (tamanhoVisual - bossRato.w) / 2
+        local offsetY = (tamanhoVisual - bossRato.h) / 2
+
         if invencivel and shaderBranco then
             LG.setShader(shaderBranco)
         end
 
-        local drawX = bossRato.x
-        local drawY = bossRato.y
+        local drawX = bossRato.x - offsetX
+        local drawY = bossRato.y - offsetY
 
         if bossRato.derrotado then
-            -- Efeito de tremor (shake)
             drawX = drawX + love.math.random(-6, 6)
             drawY = drawY + love.math.random(-6, 6)
-
-            -- Efeito de piscar vermelho/branco
             local flashRed = math.floor(love.timer.getTime() * 15) % 2 == 0
             if flashRed then
                 LG.setColor(1, 0.2, 0.2, 1)
@@ -388,8 +389,8 @@ function bossRato.draw()
         local t = 2.0 - bossRato.timerDerrota
         love.math.setRandomSeed(12345)
         for i = 1, 6 do
-            local rx = bossRato.x + bossRato.w/2 + love.math.random(-120, 120)
-            local ry = bossRato.y + bossRato.h/2 + love.math.random(-120, 120)
+            local rx = bossRato.x + bossRato.w / 2 + love.math.random(-120, 120)
+            local ry = bossRato.y + bossRato.h / 2 + love.math.random(-120, 120)
             local maxRadius = love.math.random(40, 80)
             local delay = (i - 1) * 0.25
             if t > delay then

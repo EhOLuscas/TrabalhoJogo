@@ -5,8 +5,6 @@ require "constantes"
 local originalGetWidth = love.graphics.getWidth
 local originalGetHeight = love.graphics.getHeight
 local originalGetPosition = love.mouse.getPosition
-local originalGetX = love.mouse.getX
-local originalGetY = love.mouse.getY
 
 -- Sobrescreve funções de tamanho de tela para retornar a resolução lógica do jogo (1280x720)
 function love.graphics.getWidth()

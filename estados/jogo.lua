@@ -34,6 +34,8 @@ local npcCanhaoImg
 local npcEnergiaImg
 local npcAvisoImg
 
+local debugHitbox = true -- mude para false para desativar
+
 -- Declarada antes de ser usada em jogo.update e jogo.load
 local function trocarMapa(nomeMapa, spawnX, spawnY)
     if nomeMapa == "passagem" then
@@ -394,6 +396,29 @@ function jogo.draw()
     if mapaNome == "fase1" then bossPolvo.draw() end
     if mapaNome == "fase2" then bossRato.draw() end
     dialogo.drawWorld()
+    -- Debug hitboxes
+    if debugHitbox then
+        LG.setColor(1, 0, 0, 0.3)
+        -- Hitbox bosses
+        if bossPolvo.ativo then
+            LG.rectangle("fill", bossPolvo.x, bossPolvo.y, bossPolvo.w, bossPolvo.h)
+        end
+        if bossRato.ativo then
+            LG.rectangle("fill", bossRato.x, bossRato.y, bossRato.w, bossRato.h)
+        end
+        -- Hitbox espada
+        if jogador.arma == "espada" and jogador.anim.estado == "atacando" then
+            local sx = jogador.x + (jogador.virandoDireita and jogador.w or -40)
+            LG.setColor(0, 1, 0, 0.4)
+            LG.rectangle("fill", sx, jogador.y, 50, jogador.h)
+        end
+        -- Hitbox projéteis canhão
+        LG.setColor(1, 0.5, 0, 0.5)
+        for _, p in ipairs(projeteis.lista) do
+            LG.circle("fill", p.x, p.y, 8)
+        end
+        LG.setColor(1, 1, 1)
+    end
     camera.remover()
     if gerenciadorMapas.atual.nome ~= "inicio" then
         hud.draw(jogador)
@@ -419,6 +444,10 @@ function jogo.draw()
 end
 
 function jogo.keypressed(key)
+    if key == "f1" then
+        debugHitbox = not debugHitbox
+    end
+
     if dialogo.ativo then
         dialogo.keypressed(key)
         return

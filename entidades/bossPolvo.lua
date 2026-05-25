@@ -12,8 +12,8 @@ bossPolvo.derrotado = false
 bossPolvo.timerDerrota = 0
 bossPolvo.x = 0
 bossPolvo.y = 0
-bossPolvo.w = 380
-bossPolvo.h = 380
+bossPolvo.w = 350
+bossPolvo.h = 200
 
 -- Animação
 local frames = {}
@@ -62,7 +62,7 @@ function bossPolvo.carregar()
     totalFrames = #frames
 
     bossPolvo.x = LARGURA_MAPA / 2 - bossPolvo.w / 2
-    bossPolvo.y = 60
+    bossPolvo.y = 80
 
     shaderBranco = LG.newShader([[
         vec4 effect(vec4 color, Image tex, vec2 texCoords, vec2 screenCoords) {
@@ -247,11 +247,14 @@ function bossPolvo.draw()
 
     if mostrarSprite and frames[frameAtual] then
         local img = frames[frameAtual]
-        local escala = bossPolvo.w / img:getWidth()
-        
-        -- Jitter position if corrupted or defeated
-        local bx = bossPolvo.x
-        local by = bossPolvo.y
+        local tamanhoVisual = 380
+        local escala = tamanhoVisual / img:getWidth()
+        local offsetX = (tamanhoVisual - bossPolvo.w) / 2
+        local offsetY = (tamanhoVisual - bossPolvo.h) / 2
+
+        local bx = bossPolvo.x - offsetX
+        local by = bossPolvo.y - offsetY
+
         if bossPolvo.corrompido or bossPolvo.derrotado then
             local intensity = bossPolvo.derrotado and 7 or 5
             bx = bx + love.math.random(-intensity, intensity)
@@ -264,7 +267,6 @@ function bossPolvo.draw()
             LG.draw(img, bx, by, 0, escala, escala)
             LG.setShader()
         elseif bossPolvo.derrotado then
-            -- Piscar vermelho e branco durante a derrota
             local flashRed = math.floor(love.timer.getTime() * 15) % 2 == 0
             if flashRed then
                 LG.setColor(1, 0.2, 0.2, 1)
@@ -273,20 +275,12 @@ function bossPolvo.draw()
             end
             LG.draw(img, bx, by, 0, escala, escala)
         elseif bossPolvo.corrompido then
-            -- Chromatic aberration glitch effect
-            -- Red channel shift left
             LG.setColor(0.95, 0.1, 0.1, 0.55)
             LG.draw(img, bx - 7, by, 0, escala, escala)
-            
-            -- Cyan channel shift right
             LG.setColor(0.1, 0.9, 0.9, 0.55)
             LG.draw(img, bx + 7, by, 0, escala, escala)
-            
-            -- Main sprite (slightly transparent to blend)
             LG.setColor(1, 1, 1, 0.9)
             LG.draw(img, bx, by, 0, escala, escala)
-            
-            -- Reset color
             LG.setColor(1, 1, 1)
         else
             LG.setColor(1, 1, 1)

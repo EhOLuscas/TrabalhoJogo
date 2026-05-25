@@ -270,28 +270,9 @@ function gameover.update(dt)
     local btnH = 54
     local btnX = panelX + (panelW - btnW) / 2
 
-    -- Configuração dinâmica de botões baseada em existir save
     botoes = {}
     local currentY = panelY + 130
     local spacing = 70
-
-    if save.existe() then
-        -- Ajusta o layout inicial um pouco mais para cima para caber o botão extra
-        currentY = panelY + 110
-        spacing = 62
-
-        table.insert(botoes, {
-            label = "VOLTAR AO SAVE",
-            x = btnX,
-            y = currentY,
-            w = btnW,
-            h = btnH,
-            hover = false,
-            icon = "heart",
-            acao = voltarSave
-        })
-        currentY = currentY + spacing
-    end
 
     table.insert(botoes, {
         label = "TENTAR NOVAMENTE",
@@ -300,8 +281,8 @@ function gameover.update(dt)
         w = btnW,
         h = btnH,
         hover = false,
-        icon = "star",
-        acao = tentarNovamente
+        icon = "heart",
+        acao = voltarSave
     })
     currentY = currentY + spacing
 
