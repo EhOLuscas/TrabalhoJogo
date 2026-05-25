@@ -1,66 +1,46 @@
+-- ============================================================
+-- sistemas/camera.lua
+-- Câmera 2D que centraliza o jogador na tela e respeita os
+-- limites do mapa para evitar mostrar áreas fora do mapa.
+-- Suporta escala (zoom) via camera.escala.
+-- ============================================================
+
 require "constantes"
 
-local camera = {}
+local camera   = {}
 
-camera.x = 0
-camera.y = 0
+camera.x      = 0  -- Posição X da câmera no espaço de mundo
+camera.y      = 0  -- Posição Y da câmera no espaço de mundo
+camera.escala = 1  -- Fator de zoom (1 = sem zoom)
 
-camera.escala = 1
-
+-- Atualiza a posição da câmera para centralizar no jogador,
+-- respeitando os limites do mapa
 function camera.atualizar(jogador, imagemMapa)
+    local larguraTela  = LG.getWidth()
+    local alturaTela   = LG.getHeight()
+    local larguraMapa  = imagemMapa:getWidth()
+    local alturaMapa   = imagemMapa:getHeight()
 
-    local larguraTela = LG.getWidth()
-    local alturaTela = LG.getHeight()
+    -- Centraliza a câmera no jogador (ajustado pela escala)
+    camera.x = jogador.x - larguraTela  / 2 / camera.escala
+    camera.y = jogador.y - alturaTela   / 2 / camera.escala
 
-    local larguraMapa = imagemMapa:getWidth()
-    local alturaMapa = imagemMapa:getHeight()
+    -- Limita horizontalmente para não sair do mapa
+    camera.x = math.max(0, math.min(camera.x, larguraMapa - larguraTela / camera.escala))
 
-    -- posição da câmera
-    camera.x =
-        jogador.x - larguraTela / 2 / camera.escala
-
-    camera.y =
-        jogador.y - alturaTela / 2 / camera.escala
-
-    -- Limites horizontais
-    if camera.x < 0 then
-        camera.x = 0
-    end
-
-    local maxX =
-        larguraMapa - larguraTela / camera.escala
-
-    if camera.x > maxX then
-        camera.x = maxX
-    end
-
-    -- Limites verticais
-    if camera.y < 0 then
-        camera.y = 0
-    end
-
-    local maxY =
-        alturaMapa - alturaTela / camera.escala
-
-    if camera.y > maxY then
-        camera.y = maxY
-    end
+    -- Limita verticalmente para não sair do mapa
+    camera.y = math.max(0, math.min(camera.y, alturaMapa  - alturaTela  / camera.escala))
 end
 
+-- Aplica a transformação da câmera (deve ser chamado antes de desenhar objetos do mundo)
 function camera.aplicar()
-
     LG.push()
-
     LG.scale(camera.escala)
-
-    LG.translate(
-        -camera.x,
-        -camera.y
-    )
+    LG.translate(-camera.x, -camera.y)
 end
 
+-- Remove a transformação da câmera (deve ser chamado após desenhar objetos do mundo)
 function camera.remover()
-
     LG.pop()
 end
 

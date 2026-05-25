@@ -1,54 +1,43 @@
+-- ============================================================
+-- sistemas/movimento.lua
+-- Processa a entrada do teclado (WASD) para mover o jogador,
+-- atualiza sua direção com base na posição do mouse,
+-- e resolve colisões via bump.
+-- Pausa o movimento durante diálogos ou teletransporte.
+-- ============================================================
+
 require "constantes"
 
 local movimento = {}
 
 function movimento.atualizar(dt, jogador, world, camera)
+    -- Congela movimento durante diálogo ou animação de teletransporte
     local dialogo = require "sistemas.dialogo"
-    if dialogo.ativo then
+    if dialogo.ativo or jogador.teleportando then
         jogador.updateAnim(dt, false, false)
         return
     end
 
-    if jogador.teleportando then
-        jogador.updateAnim(dt, false, false)
-        return
-    end
-
-    local dx = 0
-    local dy = 0
+    local dx     = 0
+    local dy     = 0
     local movendo = false
 
-    if LK.isDown("d") then
-        dx = jogador.velocidade * dt
-        movendo = true
-    end
+    if LK.isDown("d") then dx =  jogador.velocidade * dt; movendo = true end
+    if LK.isDown("a") then dx = -jogador.velocidade * dt; movendo = true end
+    if LK.isDown("w") then dy = -jogador.velocidade * dt; movendo = true end
+    if LK.isDown("s") then dy =  jogador.velocidade * dt; movendo = true end
 
-    if LK.isDown("a") then
-        dx = -jogador.velocidade * dt
-        movendo = true
-    end
-
-    if LK.isDown("w") then
-        dy = -jogador.velocidade * dt
-        movendo = true
-    end
-
-    if LK.isDown("s") then
-        dy = jogador.velocidade * dt
-        movendo = true
-    end
-
-    -- Vira o personagem em direção ao mouse
-    local mx = love.mouse.getX()
+    -- Vira o sprite para o lado em que o mouse está em relação ao jogador
+    local mx          = love.mouse.getX()
     local jogadorTelX = jogador.x - camera.x
-    jogador.virandoDireita = mx > jogadorTelX
+    jogador.virandoDireita = (mx > jogadorTelX)
 
-    local goalX = jogador.x + dx
-    local goalY = jogador.y + dy
-    local actualX, actualY = world:move(jogador, goalX, goalY)
+    -- Move o jogador resolvendo colisões com bump
+    local actualX, actualY = world:move(jogador, jogador.x + dx, jogador.y + dy)
     jogador.x = actualX
     jogador.y = actualY
 
+    -- Atualiza a animação (idle, andando ou atacando)
     jogador.updateAnim(dt, movendo, jogador.anim.estado == "atacando")
 end
 
