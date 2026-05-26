@@ -22,10 +22,10 @@ function movimento.atualizar(dt, jogador, world, camera)
     local dy     = 0
     local movendo = false
 
-    if LK.isDown("d") then dx =  jogador.velocidade * dt; movendo = true end
-    if LK.isDown("a") then dx = -jogador.velocidade * dt; movendo = true end
-    if LK.isDown("w") then dy = -jogador.velocidade * dt; movendo = true end
-    if LK.isDown("s") then dy =  jogador.velocidade * dt; movendo = true end
+    if LK.isDown("d") or LK.isDown("right") then dx =  jogador.velocidade * dt; movendo = true end
+    if LK.isDown("a") or LK.isDown("left") then dx = -jogador.velocidade * dt; movendo = true end
+    if LK.isDown("w") or LK.isDown("up") then dy = -jogador.velocidade * dt; movendo = true end
+    if LK.isDown("s") or LK.isDown("down") then dy =  jogador.velocidade * dt; movendo = true end
 
     -- Vira o sprite para o lado em que o mouse está em relação ao jogador
     local mx          = love.mouse.getX()
